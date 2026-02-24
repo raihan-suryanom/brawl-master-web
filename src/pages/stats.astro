@@ -1,27 +1,27 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { api } from "@/lib/api";
+import { api, type Series, type Player, type PlayerStats } from "@/lib/api";
 
-const series = await api.getSeries();
+const series = await api.getSeries() as Series[];
 
 // Get seriesId from query params
 const url = new URL(Astro.request.url);
 const selectedSeriesId = url.searchParams.get("seriesId");
 
-let stats = [];
-let selectedSeries = null;
+let stats: PlayerStats[] = [];
+let selectedSeries: Series | null = null;
 
 if (selectedSeriesId) {
-  selectedSeries = series.find((s: any) => s._id === selectedSeriesId);
-  stats = await api.getSeriesStats(selectedSeriesId);
+  selectedSeries = series.find((s) => s._id === selectedSeriesId) || null;
+  stats = await api.getSeriesStats(selectedSeriesId) as PlayerStats[];
 } else {
   // Aggregate stats from all series
-  const allPlayers = await api.getPlayers();
+  const allPlayers = await api.getPlayers() as Player[];
   const allStats = await Promise.all(
-    allPlayers.map((player: any) => api.getPlayerStats(player._id))
-  );
-  stats = allStats.sort((a: any, b: any) => b.pts - a.pts);
+    allPlayers.map((player) => api.getPlayerStats(player._id))
+  ) as PlayerStats[];
+  stats = allStats.sort((a, b) => b.pts - a.pts);
 }
 ---
 
@@ -54,7 +54,7 @@ if (selectedSeriesId) {
               class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <option value="">All Series</option>
-              {series.map((s: any) => (
+              {series.map((s) => (
                 <option value={s._id} selected={selectedSeriesId === s._id}>
                   {s.name}
                 </option>
@@ -73,7 +73,7 @@ if (selectedSeriesId) {
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {stats.map((stat: any, index: number) => (
+      {stats.map((stat, index) => (
         <a href={`/players/${stat.playerId}`}>
           <Card className="hover:border-primary transition-colors cursor-pointer">
             <CardHeader>

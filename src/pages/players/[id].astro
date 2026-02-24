@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CombinationsTable } from "@/components/CombinationsTable";
-import { api } from "@/lib/api";
+import { api, type Player, type PlayerStats, type PlayerCombination } from "@/lib/api";
 
 const { id } = Astro.params;
 
@@ -15,7 +15,7 @@ const [player, overallStats, combinations2, combinations3] = await Promise.all([
   api.getPlayerStats(id),
   api.getPlayerCombinations(id, 2),
   api.getPlayerCombinations(id, 3),
-]);
+]) as [Player, PlayerStats, PlayerCombination[], PlayerCombination[]];
 ---
 
 <Layout title={`${player.name} - Brawl Master Tracker`}>
@@ -42,42 +42,42 @@ const [player, overallStats, combinations2, combinations3] = await Promise.all([
     <!-- Overall Stats Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <Card>
-        <CardHeader class="pb-3">
+        <CardHeader className="pb-3">
           <CardDescription>Total Wins</CardDescription>
-          <CardTitle class="text-3xl">{overallStats.totalWin}</CardTitle>
+          <CardTitle className="text-3xl">{overallStats.totalWin}</CardTitle>
         </CardHeader>
       </Card>
       <Card>
-        <CardHeader class="pb-3">
+        <CardHeader className="pb-3">
           <CardDescription>Win Streak</CardDescription>
-          <CardTitle class="text-3xl">{overallStats.highestWinStreak}</CardTitle>
+          <CardTitle className="text-3xl">{overallStats.highestWinStreak}</CardTitle>
         </CardHeader>
       </Card>
       <Card>
-        <CardHeader class="pb-3">
+        <CardHeader className="pb-3">
           <CardDescription>Lose Streak</CardDescription>
-          <CardTitle class="text-3xl">{overallStats.highestLoseStreak}</CardTitle>
+          <CardTitle className="text-3xl">{overallStats.highestLoseStreak}</CardTitle>
         </CardHeader>
       </Card>
       <Card>
-        <CardHeader class="pb-3">
+        <CardHeader className="pb-3">
           <CardDescription>Points</CardDescription>
-          <CardTitle class="text-3xl">{overallStats.pts}</CardTitle>
+          <CardTitle className="text-3xl">{overallStats.pts}</CardTitle>
         </CardHeader>
       </Card>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card>
-        <CardHeader class="pb-3">
+        <CardHeader className="pb-3">
           <CardDescription>Total Games</CardDescription>
-          <CardTitle class="text-2xl">{overallStats.totalGames}</CardTitle>
+          <CardTitle className="text-2xl">{overallStats.totalGames}</CardTitle>
         </CardHeader>
       </Card>
       <Card>
-        <CardHeader class="pb-3">
+        <CardHeader className="pb-3">
           <CardDescription>Win Rate</CardDescription>
-          <CardTitle class="text-2xl">{overallStats.winRate.toFixed(1)}%</CardTitle>
+          <CardTitle className="text-2xl">{overallStats.winRate.toFixed(1)}%</CardTitle>
         </CardHeader>
       </Card>
     </div>

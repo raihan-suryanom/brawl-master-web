@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { LeaderboardTable } from "@/components/LeaderboardTable";
 import { PtsProgressionAreaChart } from "@/components/PtsProgressionAreaChart";
 import { WinRatePieChart } from "@/components/WinRatePieChart";
-import { api } from "@/lib/api";
+import { api, type Series, type Game, type PlayerStats, type PtsProgression } from "@/lib/api";
 
 const { id } = Astro.params;
 
@@ -17,7 +17,7 @@ const [series, games, stats, ptsProgression] = await Promise.all([
   api.getGames(id),
   api.getSeriesStats(id),
   api.getSeriesPtsProgression(id),
-]);
+]) as [Series, Game[], PlayerStats[], PtsProgression[]];
 ---
 
 <Layout title={`${series.name} - Brawl Master Tracker`}>

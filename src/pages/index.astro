@@ -1,9 +1,9 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { api } from "@/lib/api";
+import { api, type Series } from "@/lib/api";
 
-const series = await api.getSeries();
+const series = await api.getSeries() as Series[];
 ---
 
 <Layout title="Home - Brawl Master Tracker">

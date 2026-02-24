@@ -1,9 +1,9 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { api } from "@/lib/api";
+import { api, type Player } from "@/lib/api";
 
-const players = await api.getPlayers();
+const players = await api.getPlayers() as Player[];
 ---
 
 <Layout title="Players - Brawl Master Tracker">
@@ -32,7 +32,7 @@ const players = await api.getPlayers();
                 </div>
                 <div>
                   <CardTitle>{player.name}</CardTitle>
-                  <CardDescription class="text-xs">
+                  <CardDescription className="text-xs">
                     Click to view stats
                   </CardDescription>
                 </div>
