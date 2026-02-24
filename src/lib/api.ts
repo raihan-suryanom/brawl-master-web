@@ -71,6 +71,10 @@ export type PlayerStats = {
   winRate: number;
   maxPossiblePts?: number;
   zone?: "none" | "champion" | "safe" | "last";
+  lastFiveGames?: Array<{
+    gameNumber: number;
+    result: "W" | "L";
+  }>;
 };
 
 export type PlayerCombination = {

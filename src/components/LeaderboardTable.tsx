@@ -102,7 +102,7 @@ export function LeaderboardTable({ stats }: LeaderboardTableProps) {
                         className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                       />
                       <div className="min-w-0">
-                        <div className="font-semibold truncate">{stat.name}</div>
+                        <a className="font-semibold truncate hover:underline" href={`/players/${stat.playerId}`}>{stat.name}</a>
                         {zoneStyle.label && (
                           <div className={`text-xs font-medium ${zoneStyle.textColor}`}>
                             {zoneStyle.label}

@@ -41,7 +41,7 @@ export function CombinationsTable({ combinations, size }: CombinationsTableProps
                       alt={player.name}
                       className="w-6 h-6 rounded-full object-cover"
                     />
-                    <span className="text-sm">{player.name}</span>
+                    <a className="text-sm hover:underline" href={`/players/${player.id}`}>{player.name}</a>
                     {pIndex < combo.players.length - 1 && (
                       <span className="text-muted-foreground">+</span>
                     )}

@@ -1,5 +1,6 @@
 ---
 import "@/styles/globals.css";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface Props {
   title?: string;
@@ -9,23 +10,33 @@ const { title = "Brawl Master Tracker" } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <script is:inline>
+      // Prevent flash of unstyled content - run before page loads
+      (function() {
+        const theme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+      })();
+    </script>
   </head>
   <body>
-    <nav class="border-b">
+    <nav class="sticky top-0 z-50 bg-background border-b">
       <div class="container mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
           <a href="/" class="text-2xl font-bold">Brawl Master Tracker</a>
-          <div class="mx-auto font-bold flex gap-6">
-            <a href="/" class="hover:text-primary transition-colors">Home</a>
-            <a href="/players" class="hover:text-primary transition-colors">Players</a>
-            <a href="/stats" class="hover:text-primary transition-colors">Stats</a>
+          <div class="flex items-center gap-6">
+            <div class="font-bold flex gap-6">
+              <a href="/" class="hover:text-primary transition-colors">Home</a>
+              <a href="/players" class="hover:text-primary transition-colors">Players</a>
+              <a href="/stats" class="hover:text-primary transition-colors">Stats</a>
+            </div>
+            <ThemeToggle client:only="react" />
           </div>
         </div>
       </div>
