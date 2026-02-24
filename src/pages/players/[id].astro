@@ -1,0 +1,115 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CombinationsTable } from "@/components/CombinationsTable";
+import { api } from "@/lib/api";
+
+const { id } = Astro.params;
+
+if (!id) {
+  return Astro.redirect("/players");
+}
+
+const [player, overallStats, combinations2, combinations3] = await Promise.all([
+  api.getPlayer(id),
+  api.getPlayerStats(id),
+  api.getPlayerCombinations(id, 2),
+  api.getPlayerCombinations(id, 3),
+]);
+---
+
+<Layout title={`${player.name} - Brawl Master Tracker`}>
+  <div class="space-y-8">
+    <!-- Player Header -->
+    <div class="flex items-center gap-6">
+      <div class="relative">
+        <img
+          src={player.picture}
+          alt={player.name}
+          class="w-24 h-24 rounded-full object-cover"
+        />
+        <div
+          class="absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-4 border-background"
+          style={`background-color: ${player.color}`}
+        />
+      </div>
+      <div>
+        <h1 class="text-4xl font-bold">{player.name}</h1>
+        <p class="text-muted-foreground">Player Statistics</p>
+      </div>
+    </div>
+
+    <!-- Overall Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <Card>
+        <CardHeader class="pb-3">
+          <CardDescription>Total Wins</CardDescription>
+          <CardTitle class="text-3xl">{overallStats.totalWin}</CardTitle>
+        </CardHeader>
+      </Card>
+      <Card>
+        <CardHeader class="pb-3">
+          <CardDescription>Win Streak</CardDescription>
+          <CardTitle class="text-3xl">{overallStats.highestWinStreak}</CardTitle>
+        </CardHeader>
+      </Card>
+      <Card>
+        <CardHeader class="pb-3">
+          <CardDescription>Lose Streak</CardDescription>
+          <CardTitle class="text-3xl">{overallStats.highestLoseStreak}</CardTitle>
+        </CardHeader>
+      </Card>
+      <Card>
+        <CardHeader class="pb-3">
+          <CardDescription>Points</CardDescription>
+          <CardTitle class="text-3xl">{overallStats.pts}</CardTitle>
+        </CardHeader>
+      </Card>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Card>
+        <CardHeader class="pb-3">
+          <CardDescription>Total Games</CardDescription>
+          <CardTitle class="text-2xl">{overallStats.totalGames}</CardTitle>
+        </CardHeader>
+      </Card>
+      <Card>
+        <CardHeader class="pb-3">
+          <CardDescription>Win Rate</CardDescription>
+          <CardTitle class="text-2xl">{overallStats.winRate.toFixed(1)}%</CardTitle>
+        </CardHeader>
+      </Card>
+    </div>
+
+    <!-- Duo Combinations -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Best Duo Partners</CardTitle>
+        <CardDescription>Win rates when playing with one teammate</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {combinations2.length > 0 ? (
+          <CombinationsTable combinations={combinations2} size={2} client:load />
+        ) : (
+          <p class="text-muted-foreground text-center py-4">No combinations data available</p>
+        )}
+      </CardContent>
+    </Card>
+
+    <!-- Trio Combinations -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Best Trio Combinations</CardTitle>
+        <CardDescription>Win rates when playing with two teammates</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {combinations3.length > 0 ? (
+          <CombinationsTable combinations={combinations3} size={3} client:load />
+        ) : (
+          <p class="text-muted-foreground text-center py-4">No combinations data available</p>
+        )}
+      </CardContent>
+    </Card>
+  </div>
+</Layout>

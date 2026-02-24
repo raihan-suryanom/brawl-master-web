@@ -1,0 +1,48 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { api } from "@/lib/api";
+
+const series = await api.getSeries();
+---
+
+<Layout title="Home - Brawl Master Tracker">
+  <div class="space-y-6">
+    <div>
+      <h1 class="text-4xl font-bold">Series</h1>
+      <p class="text-muted-foreground">All brawl series</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {series.map((s: any) => (
+        <a href={`/series/${s._id}`}>
+          <Card className="hover:border-primary transition-colors cursor-pointer">
+            <CardHeader>
+              <CardTitle>{s.name}</CardTitle>
+              <CardDescription>
+                {s.participants.length} players • 10 games
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div class="flex -space-x-2">
+                {s.participants.slice(0, 6).map((player: any) => (
+                  <img
+                    src={player.picture}
+                    alt={player.name}
+                    class="w-10 h-10 rounded-full border-2 border-background object-cover"
+                    title={player.name}
+                  />
+                ))}
+                {s.participants.length > 6 && (
+                  <div class="w-10 h-10 rounded-full border-2 border-background bg-muted flex items-center justify-center text-sm font-medium">
+                    +{s.participants.length - 6}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </a>
+      ))}
+    </div>
+  </div>
+</Layout>
