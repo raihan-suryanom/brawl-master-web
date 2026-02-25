@@ -195,7 +195,7 @@ const rangeText = fromSeries && toSeries ? `${fromSeries.name} - ${toSeries.name
         <CardDescription>Normalized metrics (per-game basis)</CardDescription>
       </CardHeader>
       <CardContent>
-        <PlayerRadarChart stats={overallStats} allPlayersStats={allPlayersStats} client:only="react" />
+        <PlayerRadarChart stats={overallStats} allPlayersStats={allPlayersStats} client:visible />
       </CardContent>
     </Card>
 
@@ -250,7 +250,7 @@ const rangeText = fromSeries && toSeries ? `${fromSeries.name} - ${toSeries.name
       </CardHeader>
       <CardContent>
         {combinations2.length > 0 ? (
-          <CombinationsTable combinations={combinations2} size={2} client:load />
+          <CombinationsTable combinations={combinations2} size={2} client:visible />
         ) : (
           <p class="text-muted-foreground text-center py-4">No combinations data available</p>
         )}
@@ -265,7 +265,7 @@ const rangeText = fromSeries && toSeries ? `${fromSeries.name} - ${toSeries.name
       </CardHeader>
       <CardContent>
         {combinations3.length > 0 ? (
-          <CombinationsTable combinations={combinations3} size={3} client:load />
+          <CombinationsTable combinations={combinations3} size={3} client:visible />
         ) : (
           <p class="text-muted-foreground text-center py-4">No combinations data available</p>
         )}

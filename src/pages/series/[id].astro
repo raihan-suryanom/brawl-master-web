@@ -36,7 +36,7 @@ const [series, games, stats, ptsProgression] = await Promise.all([
         <CardDescription>Player rankings by points</CardDescription>
       </CardHeader>
       <CardContent>
-        <LeaderboardTable stats={stats} client:load />
+        <LeaderboardTable stats={stats} client:visible />
       </CardContent>
     </Card>
 
@@ -48,7 +48,7 @@ const [series, games, stats, ptsProgression] = await Promise.all([
           <CardDescription>How points evolved across games</CardDescription>
         </CardHeader>
         <CardContent>
-          <PtsProgressionAreaChart progression={ptsProgression} client:load />
+          <PtsProgressionAreaChart progression={ptsProgression} client:visible />
         </CardContent>
       </Card>
 
@@ -58,7 +58,7 @@ const [series, games, stats, ptsProgression] = await Promise.all([
           <CardDescription>Wins by player</CardDescription>
         </CardHeader>
         <CardContent>
-          <WinRatePieChart stats={stats} client:load />
+          <WinRatePieChart stats={stats} client:visible />
         </CardContent>
       </Card>
     </div>
