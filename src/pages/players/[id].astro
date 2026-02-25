@@ -25,19 +25,18 @@ const profileData = await api.getPlayerFullProfile(id, fromSeriesId || undefined
   combinations2: PlayerCombination[];
   combinations3: PlayerCombination[];
   positionHistory: Record<string, number>;
+  radarContext: {
+    allPlayersStats: PlayerStats[];
+  };
 };
 
-const { stats: overallStats, combinations2, combinations3, positionHistory } = profileData;
+const { stats: overallStats, combinations2, combinations3, positionHistory, radarContext } = profileData;
 
-const [player, allPlayers] = await Promise.all([
-  api.getPlayer(id),
-  api.getPlayers(),
-]) as [Player, Player[]];
+// Get player info
+const player = await api.getPlayer(id) as Player;
 
-// Fetch all players stats for radar chart normalization
-const allPlayersStats = await Promise.all(
-  allPlayers.map(p => api.getPlayerStats(p._id))
-) as PlayerStats[];
+// Use radarContext from bundled response instead of fetching again
+const allPlayersStats = radarContext.allPlayersStats;
 
 // Find selected series names for display
 const fromSeries = fromSeriesId ? allSeries.find(s => s._id === fromSeriesId) : null;
