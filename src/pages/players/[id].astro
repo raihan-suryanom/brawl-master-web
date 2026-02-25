@@ -19,29 +19,15 @@ const toSeriesId = url.searchParams.get("toSeriesId");
 // Fetch all series for dropdown
 const allSeries = await api.getSeries() as Series[];
 
-// Fetch player data based on series range
-let overallStats: PlayerStats;
-let combinations2: PlayerCombination[];
-let combinations3: PlayerCombination[];
-let positionHistory: Record<string, number>;
+// Fetch player data using BUNDLED endpoint (single API call)
+const profileData = await api.getPlayerFullProfile(id, fromSeriesId || undefined, toSeriesId || undefined) as {
+  stats: PlayerStats;
+  combinations2: PlayerCombination[];
+  combinations3: PlayerCombination[];
+  positionHistory: Record<string, number>;
+};
 
-if (fromSeriesId && toSeriesId) {
-  // Range filter
-  [overallStats, combinations2, combinations3, positionHistory] = await Promise.all([
-    api.getPlayerStatsRange(id, fromSeriesId, toSeriesId),
-    api.getPlayerCombinationsRange(id, 2, fromSeriesId, toSeriesId),
-    api.getPlayerCombinationsRange(id, 3, fromSeriesId, toSeriesId),
-    api.getPlayerPositionHistory(id, fromSeriesId, toSeriesId),
-  ]) as [PlayerStats, PlayerCombination[], PlayerCombination[], Record<string, number>];
-} else {
-  // All series (default)
-  [overallStats, combinations2, combinations3, positionHistory] = await Promise.all([
-    api.getPlayerStats(id),
-    api.getPlayerCombinations(id, 2),
-    api.getPlayerCombinations(id, 3),
-    api.getPlayerPositionHistory(id),
-  ]) as [PlayerStats, PlayerCombination[], PlayerCombination[], Record<string, number>];
-}
+const { stats: overallStats, combinations2, combinations3, positionHistory } = profileData;
 
 const [player, allPlayers] = await Promise.all([
   api.getPlayer(id),

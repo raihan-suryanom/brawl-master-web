@@ -37,6 +37,13 @@ export const api = {
     }
     return fetcher(`/players/${playerId}/position-history`);
   },
+  // Bundled endpoint for player detail page (single API call)
+  getPlayerFullProfile: (playerId: string, fromSeriesId?: string, toSeriesId?: string) => {
+    if (fromSeriesId && toSeriesId) {
+      return fetcher(`/players/${playerId}/full-profile?fromSeriesId=${fromSeriesId}&toSeriesId=${toSeriesId}`);
+    }
+    return fetcher(`/players/${playerId}/full-profile`);
+  },
 };
 
 export type Player = {
