@@ -25,8 +25,18 @@ export const api = {
   getSeriesPtsProgression: (seriesId: string) => fetcher(`/series/${seriesId}/pts-progression`),
   getPlayerStats: (playerId: string, seriesId?: string) => 
     fetcher(`/players/${playerId}/stats${seriesId ? `?seriesId=${seriesId}` : ""}`),
+  getPlayerStatsRange: (playerId: string, fromSeriesId: string, toSeriesId: string) =>
+    fetcher(`/players/${playerId}/stats?fromSeriesId=${fromSeriesId}&toSeriesId=${toSeriesId}`),
   getPlayerCombinations: (playerId: string, size: 2 | 3, seriesId?: string) =>
     fetcher(`/players/${playerId}/combinations?size=${size}${seriesId ? `&seriesId=${seriesId}` : ""}`),
+  getPlayerCombinationsRange: (playerId: string, size: 2 | 3, fromSeriesId: string, toSeriesId: string) =>
+    fetcher(`/players/${playerId}/combinations?size=${size}&fromSeriesId=${fromSeriesId}&toSeriesId=${toSeriesId}`),
+  getPlayerPositionHistory: (playerId: string, fromSeriesId?: string, toSeriesId?: string) => {
+    if (fromSeriesId && toSeriesId) {
+      return fetcher(`/players/${playerId}/position-history?fromSeriesId=${fromSeriesId}&toSeriesId=${toSeriesId}`);
+    }
+    return fetcher(`/players/${playerId}/position-history`);
+  },
 };
 
 export type Player = {

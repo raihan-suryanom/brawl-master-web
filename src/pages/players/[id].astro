@@ -2,7 +2,8 @@
 import Layout from "@/layouts/Layout.astro";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CombinationsTable } from "@/components/CombinationsTable";
-import { api, type Player, type PlayerStats, type PlayerCombination } from "@/lib/api";
+import { PlayerRadarChart } from "@/components/PlayerRadarChart";
+import { api, type Player, type PlayerStats, type PlayerCombination, type Series } from "@/lib/api";
 
 const { id } = Astro.params;
 
@@ -10,34 +11,208 @@ if (!id) {
   return Astro.redirect("/players");
 }
 
-const [player, overallStats, combinations2, combinations3] = await Promise.all([
+// Get series range from query params
+const url = new URL(Astro.request.url);
+const fromSeriesId = url.searchParams.get("fromSeriesId");
+const toSeriesId = url.searchParams.get("toSeriesId");
+
+// Fetch all series for dropdown
+const allSeries = await api.getSeries() as Series[];
+
+// Fetch player data based on series range
+let overallStats: PlayerStats;
+let combinations2: PlayerCombination[];
+let combinations3: PlayerCombination[];
+let positionHistory: Record<string, number>;
+
+if (fromSeriesId && toSeriesId) {
+  // Range filter
+  [overallStats, combinations2, combinations3, positionHistory] = await Promise.all([
+    api.getPlayerStatsRange(id, fromSeriesId, toSeriesId),
+    api.getPlayerCombinationsRange(id, 2, fromSeriesId, toSeriesId),
+    api.getPlayerCombinationsRange(id, 3, fromSeriesId, toSeriesId),
+    api.getPlayerPositionHistory(id, fromSeriesId, toSeriesId),
+  ]) as [PlayerStats, PlayerCombination[], PlayerCombination[], Record<string, number>];
+} else {
+  // All series (default)
+  [overallStats, combinations2, combinations3, positionHistory] = await Promise.all([
+    api.getPlayerStats(id),
+    api.getPlayerCombinations(id, 2),
+    api.getPlayerCombinations(id, 3),
+    api.getPlayerPositionHistory(id),
+  ]) as [PlayerStats, PlayerCombination[], PlayerCombination[], Record<string, number>];
+}
+
+const [player, allPlayers] = await Promise.all([
   api.getPlayer(id),
-  api.getPlayerStats(id),
-  api.getPlayerCombinations(id, 2),
-  api.getPlayerCombinations(id, 3),
-]) as [Player, PlayerStats, PlayerCombination[], PlayerCombination[]];
+  api.getPlayers(),
+]) as [Player, Player[]];
+
+// Fetch all players stats for radar chart normalization
+const allPlayersStats = await Promise.all(
+  allPlayers.map(p => api.getPlayerStats(p._id))
+) as PlayerStats[];
+
+// Find selected series names for display
+const fromSeries = fromSeriesId ? allSeries.find(s => s._id === fromSeriesId) : null;
+const toSeries = toSeriesId ? allSeries.find(s => s._id === toSeriesId) : null;
+const rangeText = fromSeries && toSeries ? `${fromSeries.name} - ${toSeries.name}` : "All Series";
 ---
 
 <Layout title={`${player.name} - Brawl Master Tracker`}>
   <div class="space-y-8">
     <!-- Player Header -->
-    <div class="flex items-center gap-6">
-      <div class="relative">
-        <img
-          src={player.picture}
-          alt={player.name}
-          class="w-24 h-24 rounded-full object-cover"
-        />
-        <div
-          class="absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-4 border-background"
-          style={`background-color: ${player.color}`}
-        />
+    <div class="flex items-start justify-between gap-6">
+      <!-- Left: Avatar and Name -->
+      <div class="flex items-center gap-6">
+        <div class="relative">
+          <img
+            src={player.picture}
+            alt={player.name}
+            class="w-24 h-24 rounded-full object-cover"
+          />
+          <div
+            class="absolute -bottom-2 -right-2 w-8 h-8 rounded-full border-4 border-background"
+            style={`background-color: ${player.color}`}
+          />
+        </div>
+        <div>
+          <h1 class="text-4xl font-bold">{player.name}</h1>
+          <p class="text-muted-foreground">Player Statistics ({rangeText})</p>
+        </div>
       </div>
-      <div>
-        <h1 class="text-4xl font-bold">{player.name}</h1>
-        <p class="text-muted-foreground">Player Statistics</p>
+
+      <!-- Right: Position Medals -->
+      <div class="flex flex-wrap gap-3 items-center">
+        {Object.keys(positionHistory).length > 0 ? (
+          <>
+            {/* 1st Place - Gold Medal */}
+            <div class={`flex items-center gap-1 ${!positionHistory['1'] ? 'opacity-50' : ''}`}>
+              <span class="text-2xl">🥇</span>
+              <span class="text-sm font-semibold">×{positionHistory['1'] || 0}</span>
+            </div>
+            
+            {/* 2nd Place - Silver Medal */}
+            <div class={`flex items-center gap-1 ${!positionHistory['2'] ? 'opacity-50' : ''}`}>
+              <span class="text-2xl">🥈</span>
+              <span class="text-sm font-semibold">×{positionHistory['2'] || 0}</span>
+            </div>
+            
+            {/* 3rd Place - Bronze Medal */}
+            <div class={`flex items-center gap-1 ${!positionHistory['3'] ? 'opacity-50' : ''}`}>
+              <span class="text-2xl">🥉</span>
+              <span class="text-sm font-semibold">×{positionHistory['3'] || 0}</span>
+            </div>
+
+            {/* 4th Place */}
+            <div class={`flex items-center gap-1 ${!positionHistory['4'] ? 'opacity-50' : ''}`}>
+              <span class="text-lg">4️⃣</span>
+              <span class="text-sm font-semibold">×{positionHistory['4'] || 0}</span>
+            </div>
+
+            {/* 5th Place */}
+            <div class={`flex items-center gap-1 ${!positionHistory['5'] ? 'opacity-50' : ''}`}>
+              <span class="text-lg">5️⃣</span>
+              <span class="text-sm font-semibold">×{positionHistory['5'] || 0}</span>
+            </div>
+
+            {/* 6th Place */}
+            <div class={`flex items-center gap-1 ${!positionHistory['6'] ? 'opacity-50' : ''}`}>
+              <span class="text-lg">🤣</span>
+              <span class="text-sm font-semibold">×{positionHistory['6'] || 0}</span>
+            </div>
+
+            {/* Last Place - Laugh Emoji */}
+            {(() => {
+              // Find the highest position (last place)
+              const maxPosition = Math.max(...Object.keys(positionHistory).map(k => parseInt(k)));
+              if (maxPosition >= 8) {
+                return (
+                  <div class={`flex items-center gap-1 ${!positionHistory[maxPosition.toString()] ? 'opacity-50' : ''}`}>
+                    <span class="text-2xl">🤣</span>
+                    <span class="text-sm font-semibold">×{positionHistory[maxPosition.toString()] || 0}</span>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+          </>
+        ) : (
+          <p class="text-sm text-muted-foreground">No position data</p>
+        )}
       </div>
     </div>
+
+    <!-- Series Range Filter -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Filter by Series Range</CardTitle>
+        <CardDescription>View stats for a specific series range or all series</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form method="get" action={`/players/${id}`} class="flex flex-wrap gap-4 items-end">
+          <div class="flex-1 min-w-[200px]">
+            <label for="fromSeriesId" class="block text-sm font-medium mb-2">
+              From Series
+            </label>
+            <select
+              id="fromSeriesId"
+              name="fromSeriesId"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <option value="">Select start</option>
+              {allSeries.map((s) => (
+                <option value={s._id} selected={fromSeriesId === s._id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div class="flex-1 min-w-[200px]">
+            <label for="toSeriesId" class="block text-sm font-medium mb-2">
+              To Series
+            </label>
+            <select
+              id="toSeriesId"
+              name="toSeriesId"
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <option value="">Select end</option>
+              {allSeries.map((s) => (
+                <option value={s._id} selected={toSeriesId === s._id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="submit"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            Apply Filter
+          </button>
+          {(fromSeriesId || toSeriesId) && (
+            <a
+              href={`/players/${id}`}
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+            >
+              Clear Filter
+            </a>
+          )}
+        </form>
+      </CardContent>
+    </Card>
+
+    <!-- Radar Chart -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Performance Overview</CardTitle>
+        <CardDescription>Normalized metrics (per-game basis)</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <PlayerRadarChart stats={overallStats} allPlayersStats={allPlayersStats} client:only="react" />
+      </CardContent>
+    </Card>
 
     <!-- Overall Stats Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
