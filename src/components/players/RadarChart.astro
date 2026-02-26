@@ -1,0 +1,27 @@
+---
+import { api, type Player, type PlayerStats } from "@/lib/api";
+import { PlayerRadarChart } from "../PlayerRadarChart";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import type { ProfileProps } from "./Profile.astro";
+
+const { playerId, fromSeriesId, toSeriesId } = Astro.props as ProfileProps;
+
+const overallStats =  fromSeriesId && toSeriesId
+  ? await api.getPlayerStatsRange(playerId, fromSeriesId, toSeriesId) as PlayerStats
+  : await api.getPlayerStats(playerId) as PlayerStats;
+
+const allPlayers = await api.getPlayers() as Player[];
+
+const allPlayersStats = await Promise.all(
+  allPlayers.map(p => api.getPlayerStats(p._id))
+) as PlayerStats[];
+---
+<Card>
+  <CardHeader>
+    <CardTitle>Performance Overview</CardTitle>
+    <CardDescription>Normalized metrics (per-game basis)</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <PlayerRadarChart stats={overallStats} allPlayersStats={allPlayersStats} client:visible />
+  </CardContent>
+</Card>

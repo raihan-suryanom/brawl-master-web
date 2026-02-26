@@ -1,0 +1,67 @@
+---
+import { api, type Series } from "@/lib/api";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import type { ProfileProps } from "./Profile.astro";
+
+const { playerId, fromSeriesId, toSeriesId } = Astro.props as ProfileProps;
+const allSeries = await api.getSeries() as Series[]
+
+---
+<Card>
+  <CardHeader>
+    <CardTitle>Filter by Series Range</CardTitle>
+    <CardDescription>View stats for a specific series range or all series</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <form method="get" action={`/players/${playerId}`} class="flex flex-wrap gap-4 items-end">
+      <div class="flex-1 min-w-[200px]">
+        <label for="fromSeriesId" class="block text-sm font-medium mb-2">
+          From Series
+        </label>
+        <select
+          id="fromSeriesId"
+          name="fromSeriesId"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <option value="">Select start</option>
+          {allSeries.map((s) => (
+            <option value={s._id} selected={fromSeriesId === s._id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div class="flex-1 min-w-[200px]">
+        <label for="toSeriesId" class="block text-sm font-medium mb-2">
+          To Series
+        </label>
+        <select
+          id="toSeriesId"
+          name="toSeriesId"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <option value="">Select end</option>
+          {allSeries.map((s) => (
+            <option value={s._id} selected={toSeriesId === s._id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <button
+        type="submit"
+        class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+      >
+        Apply Filter
+      </button>
+      {(fromSeriesId || toSeriesId) && (
+        <a
+          href={`/players/${playerId}`}
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+        >
+          Clear Filter
+        </a>
+      )}
+    </form>
+  </CardContent>
+</Card>

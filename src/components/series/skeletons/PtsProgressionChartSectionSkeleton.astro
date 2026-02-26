@@ -1,0 +1,19 @@
+---
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+---
+
+<Card>
+  <CardHeader>
+    <div class="space-y-2 animate-pulse">
+      <div class="h-6 w-40 bg-muted rounded"></div>
+      <div class="h-4 w-56 bg-muted rounded"></div>
+    </div>
+  </CardHeader>
+  <CardContent>
+    <div class="h-[300px] flex items-end gap-2 animate-pulse">
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+        <div class="flex-1 bg-muted rounded-t" style={`height: ${Math.random() * 80 + 20}%`}></div>
+      ))}
+    </div>
+  </CardContent>
+</Card>

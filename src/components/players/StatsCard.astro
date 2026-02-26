@@ -1,0 +1,58 @@
+---
+import { api, type PlayerStats } from "@/lib/api";
+import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
+
+type StatsCardProps = {
+  playerId: string, 
+  fromSeriesId: string, 
+  toSeriesId: string,
+};
+
+const { playerId, fromSeriesId, toSeriesId } = Astro.props as StatsCardProps;
+
+const overallStats =  fromSeriesId && toSeriesId
+  ? await api.getPlayerStatsRange(playerId, fromSeriesId, toSeriesId) as PlayerStats
+  : await api.getPlayerStats(playerId) as PlayerStats;
+
+---
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+  <Card>
+    <CardHeader className="pb-3">
+      <CardDescription>Total Wins</CardDescription>
+      <CardTitle className="text-3xl">{overallStats.totalWin}</CardTitle>
+    </CardHeader>
+  </Card>
+  <Card>
+    <CardHeader className="pb-3">
+      <CardDescription>Win Streak</CardDescription>
+      <CardTitle className="text-3xl">{overallStats.highestWinStreak}</CardTitle>
+    </CardHeader>
+  </Card>
+  <Card>
+    <CardHeader className="pb-3">
+      <CardDescription>Lose Streak</CardDescription>
+      <CardTitle className="text-3xl">{overallStats.highestLoseStreak}</CardTitle>
+    </CardHeader>
+  </Card>
+  <Card>
+    <CardHeader className="pb-3">
+      <CardDescription>Points</CardDescription>
+      <CardTitle className="text-3xl">{overallStats.pts}</CardTitle>
+    </CardHeader>
+  </Card>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <Card>
+    <CardHeader className="pb-3">
+      <CardDescription>Total Games</CardDescription>
+      <CardTitle className="text-2xl">{overallStats.totalGames}</CardTitle>
+    </CardHeader>
+  </Card>
+  <Card>
+    <CardHeader className="pb-3">
+      <CardDescription>Win Rate</CardDescription>
+      <CardTitle className="text-2xl">{overallStats.winRate?.toFixed(1)}%</CardTitle>
+    </CardHeader>
+  </Card>
+</div>

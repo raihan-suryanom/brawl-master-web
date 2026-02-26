@@ -1,0 +1,24 @@
+---
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PtsProgressionAreaChart } from "@/components/PtsProgressionAreaChart";
+import { api, type PtsProgression } from "@/lib/api";
+
+export type PtsProgressionChartSectionProps = {
+  seriesId: string;
+};
+
+const { seriesId } = Astro.props as PtsProgressionChartSectionProps;
+
+// Fetch pts progression at component level
+const ptsProgression = await api.getSeriesPtsProgression(seriesId) as PtsProgression[];
+---
+
+<Card>
+  <CardHeader>
+    <CardTitle>Points Progression</CardTitle>
+    <CardDescription>How points evolved across games</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <PtsProgressionAreaChart progression={ptsProgression} client:only="react" />
+  </CardContent>
+</Card>

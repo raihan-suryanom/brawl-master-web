@@ -1,0 +1,27 @@
+---
+import { StatsTable } from "@/components/StatsTable";
+import { api, type Player, type PlayerStats } from "@/lib/api";
+
+export type StatsTableSectionProps = {
+  selectedSeriesId: string | null;
+};
+
+const { selectedSeriesId } = Astro.props as StatsTableSectionProps;
+
+// Fetch stats data at component level
+let stats: PlayerStats[] = [];
+
+if (selectedSeriesId) {
+  stats = await api.getSeriesStats(selectedSeriesId) as PlayerStats[];
+} else {
+  // Aggregate stats from all series
+  const allPlayers = await api.getPlayers() as Player[];
+  const allStats = await Promise.all(
+    allPlayers.map((player) => api.getPlayerStats(player._id))
+  ) as PlayerStats[];
+  stats = allStats.sort((a, b) => b.pts - a.pts);
+}
+---
+
+<!-- Stats Table -->
+<StatsTable stats={stats} client:only="react" />

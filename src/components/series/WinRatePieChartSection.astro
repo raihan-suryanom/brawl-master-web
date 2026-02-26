@@ -1,0 +1,24 @@
+---
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { WinRatePieChart } from "@/components/WinRatePieChart";
+import { api, type PlayerStats } from "@/lib/api";
+
+export type WinRatePieChartSectionProps = {
+  seriesId: string;
+};
+
+const { seriesId } = Astro.props as WinRatePieChartSectionProps;
+
+// Fetch stats at component level
+const stats = await api.getSeriesStats(seriesId) as PlayerStats[];
+---
+
+<Card>
+  <CardHeader>
+    <CardTitle>Win Distribution</CardTitle>
+    <CardDescription>Wins by player</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <WinRatePieChart stats={stats} client:only="react" />
+  </CardContent>
+</Card>

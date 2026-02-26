@@ -1,0 +1,29 @@
+---
+import { Card, CardHeader, CardDescription } from "@/components/ui/card";
+---
+<!-- Stats Cards Grid -->
+<div class="space-y-4">
+  <!-- Top 4 cards -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
+    {[1, 2, 3, 4].map(() => (
+      <Card>
+        <CardHeader className="pb-3">
+          <div class="h-4 w-20 bg-muted rounded mb-2"></div>
+          <div class="h-8 w-16 bg-muted rounded"></div>
+        </CardHeader>
+      </Card>
+    ))}
+  </div>
+
+  <!-- Bottom 2 cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
+    {[1, 2].map(() => (
+      <Card>
+        <CardHeader className="pb-3">
+          <div class="h-4 w-24 bg-muted rounded mb-2"></div>
+          <div class="h-7 w-20 bg-muted rounded"></div>
+        </CardHeader>
+      </Card>
+    ))}
+  </div>
+</div>

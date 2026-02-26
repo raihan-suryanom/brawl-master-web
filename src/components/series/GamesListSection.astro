@@ -1,0 +1,64 @@
+---
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { api, type Game } from "@/lib/api";
+
+export type GamesListSectionProps = {
+  seriesId: string;
+};
+
+const { seriesId } = Astro.props as GamesListSectionProps;
+
+// Fetch games at component level
+const games = await api.getGames(seriesId) as Game[];
+---
+
+<Card>
+  <CardHeader>
+    <CardTitle>Games</CardTitle>
+    <CardDescription>Match history</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <div class="space-y-4">
+      {games.map((game) => (
+        <div class="border rounded-lg p-4">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-medium">Game {game.gameNumber}</span>
+            <span class="text-xs text-muted-foreground">
+              {new Date(game.createdAt).toLocaleDateString()}
+            </span>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class={`p-3 rounded ${game.winner === 'teamBlue' ? 'bg-blue-100 dark:bg-blue-950' : 'bg-muted'}`}>
+              <div class="text-sm font-medium mb-2 text-blue-600 dark:text-blue-400">
+                Team Blue {game.winner === 'teamBlue' && '👑'}
+              </div>
+              <div class="space-y-1">
+                {game.teamBlue.map((player) => (
+                  <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full" style={`background-color: ${player.color}`} />
+                    <img src={player.picture} alt={player.name} class="w-6 h-6 rounded-full object-cover" />
+                    <span class="text-sm">{player.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div class={`p-3 rounded ${game.winner === 'teamRed' ? 'bg-red-100 dark:bg-red-950' : 'bg-muted'}`}>
+              <div class="text-sm font-medium mb-2 text-red-600 dark:text-red-400">
+                Team Red {game.winner === 'teamRed' && '👑'}
+              </div>
+              <div class="space-y-1">
+                {game.teamRed.map((player) => (
+                  <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full" style={`background-color: ${player.color}`} />
+                    <img src={player.picture} alt={player.name} class="w-6 h-6 rounded-full object-cover" />
+                    <span class="text-sm">{player.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </CardContent>
+</Card>

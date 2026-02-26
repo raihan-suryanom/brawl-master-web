@@ -1,0 +1,54 @@
+---
+import { api } from "@/lib/api";
+import type { ProfileProps } from "./Profile.astro";
+
+const { playerId, fromSeriesId, toSeriesId } = Astro.props as ProfileProps;
+
+const positionHistory =  fromSeriesId && toSeriesId
+  ? await api.getPlayerPositionHistory(playerId, fromSeriesId, toSeriesId) as Record<string, number>
+  : await api.getPlayerPositionHistory(playerId) as Record<string, number>;
+
+---
+<div class="flex flex-wrap gap-3 items-center">
+  {Object.keys(positionHistory).length > 0 ? (
+    <>
+      {/* 1st Place - Gold Medal */}
+      <div class={`flex items-center gap-1 ${!positionHistory['1'] ? 'opacity-50' : ''}`}>
+        <span class="text-2xl">🥇</span>
+        <span class="text-sm font-semibold">×{positionHistory['1'] || 0}</span>
+      </div>
+      
+      {/* 2nd Place - Silver Medal */}
+      <div class={`flex items-center gap-1 ${!positionHistory['2'] ? 'opacity-50' : ''}`}>
+        <span class="text-2xl">🥈</span>
+        <span class="text-sm font-semibold">×{positionHistory['2'] || 0}</span>
+      </div>
+      
+      {/* 3rd Place - Bronze Medal */}
+      <div class={`flex items-center gap-1 ${!positionHistory['3'] ? 'opacity-50' : ''}`}>
+        <span class="text-2xl">🥉</span>
+        <span class="text-sm font-semibold">×{positionHistory['3'] || 0}</span>
+      </div>
+
+      {/* 4th Place */}
+      <div class={`flex items-center gap-1 ${!positionHistory['4'] ? 'opacity-50' : ''}`}>
+        <span class="text-lg">4️⃣</span>
+        <span class="text-sm font-semibold">×{positionHistory['4'] || 0}</span>
+      </div>
+
+      {/* 5th Place */}
+      <div class={`flex items-center gap-1 ${!positionHistory['5'] ? 'opacity-50' : ''}`}>
+        <span class="text-lg">5️⃣</span>
+        <span class="text-sm font-semibold">×{positionHistory['5'] || 0}</span>
+      </div>
+
+      {/* 6th Place */}
+      <div class={`flex items-center gap-1 ${!positionHistory['6'] ? 'opacity-50' : ''}`}>
+        <span class="text-lg">🤣</span>
+        <span class="text-sm font-semibold">×{positionHistory['6'] || 0}</span>
+      </div>
+    </>
+  ) : (
+    <p class="text-sm text-muted-foreground">No position data</p>
+  )}
+</div>

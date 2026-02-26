@@ -1,0 +1,38 @@
+---
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+---
+
+<Card>
+  <CardHeader>
+    <div class="space-y-2 animate-pulse">
+      <div class="h-6 w-32 bg-muted rounded"></div>
+      <div class="h-4 w-48 bg-muted rounded"></div>
+    </div>
+  </CardHeader>
+  <CardContent>
+    <div class="space-y-3 animate-pulse">
+      <!-- Table header -->
+      <div class="grid grid-cols-7 gap-4 pb-2 border-b">
+        {[1, 2, 3, 4, 5, 6, 7].map(() => (
+          <div class="h-4 w-12 bg-muted rounded"></div>
+        ))}
+      </div>
+      
+      <!-- Table rows -->
+      {[1, 2, 3, 4, 5, 6, 7, 8].map(() => (
+        <div class="grid grid-cols-7 gap-4 items-center py-2">
+          <div class="h-6 w-8 bg-muted rounded"></div>
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-muted"></div>
+            <div class="h-4 w-20 bg-muted rounded"></div>
+          </div>
+          <div class="h-4 w-8 bg-muted rounded"></div>
+          <div class="h-4 w-8 bg-muted rounded"></div>
+          <div class="h-4 w-12 bg-muted rounded"></div>
+          <div class="h-4 w-12 bg-muted rounded"></div>
+          <div class="h-6 w-12 bg-muted rounded"></div>
+        </div>
+      ))}
+    </div>
+  </CardContent>
+</Card>

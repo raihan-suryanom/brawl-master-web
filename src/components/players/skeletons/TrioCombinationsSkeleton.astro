@@ -1,0 +1,40 @@
+---
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+---
+<Card>
+  <CardHeader>
+    <div class="space-y-2 animate-pulse">
+      <div class="h-6 w-56 bg-muted rounded"></div>
+      <div class="h-4 w-80 bg-muted rounded"></div>
+    </div>
+  </CardHeader>
+  <CardContent>
+    <div class="space-y-3 animate-pulse">
+      <!-- Table header -->
+      <div class="grid grid-cols-5 gap-4 pb-2 border-b">
+        <div class="h-4 w-16 bg-muted rounded"></div>
+        <div class="h-4 w-20 bg-muted rounded"></div>
+        <div class="h-4 w-12 bg-muted rounded"></div>
+        <div class="h-4 w-12 bg-muted rounded"></div>
+        <div class="h-4 w-16 bg-muted rounded"></div>
+      </div>
+      
+      <!-- Table rows -->
+      {[1, 2, 3, 4, 5].map(() => (
+        <div class="grid grid-cols-5 gap-4 items-center py-3">
+          <!-- Players column (3 avatars for trio) -->
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-muted"></div>
+            <div class="w-8 h-8 rounded-full bg-muted"></div>
+            <div class="w-8 h-8 rounded-full bg-muted"></div>
+          </div>
+          <!-- Stats columns -->
+          <div class="h-4 w-16 bg-muted rounded"></div>
+          <div class="h-4 w-8 bg-muted rounded"></div>
+          <div class="h-4 w-8 bg-muted rounded"></div>
+          <div class="h-4 w-12 bg-muted rounded"></div>
+        </div>
+      ))}
+    </div>
+  </CardContent>
+</Card>

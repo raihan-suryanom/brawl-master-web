@@ -1,0 +1,29 @@
+---
+import { Card, CardHeader } from "@/components/ui/card";
+---
+
+<div class="space-y-6">
+  <div class="animate-pulse">
+    <div class="h-10 w-32 bg-muted rounded mb-2"></div>
+    <div class="h-4 w-48 bg-muted rounded"></div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {[1, 2, 3, 4, 5, 6, 7, 8].map(() => (
+      <Card>
+        <CardHeader>
+          <div class="flex items-center gap-4 animate-pulse">
+            <div class="relative">
+              <div class="w-16 h-16 rounded-full bg-muted"></div>
+              <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-muted border-2 border-background"></div>
+            </div>
+            <div class="space-y-2">
+              <div class="h-5 w-24 bg-muted rounded"></div>
+              <div class="h-3 w-32 bg-muted rounded"></div>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+    ))}
+  </div>
+</div>

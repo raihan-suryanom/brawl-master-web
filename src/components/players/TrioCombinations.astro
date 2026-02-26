@@ -1,0 +1,27 @@
+---
+import { api, type PlayerCombination } from "@/lib/api";
+import { CombinationsTable } from "../CombinationsTable";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import type { ProfileProps } from "./Profile.astro";
+
+const { playerId, fromSeriesId, toSeriesId } = Astro.props as ProfileProps;
+
+const combinations3 =  fromSeriesId && toSeriesId
+  ? await api.getPlayerCombinationsRange(playerId, 3, fromSeriesId, toSeriesId) as PlayerCombination[]
+  : await api.getPlayerCombinations(playerId, 3) as PlayerCombination[];
+
+---
+
+<Card>
+  <CardHeader>
+    <CardTitle>Best Trio Combinations</CardTitle>
+    <CardDescription>Win rates when playing with two teammates</CardDescription>
+  </CardHeader>
+  <CardContent>
+    {combinations3.length > 0 ? (
+      <CombinationsTable combinations={combinations3} size={3} client:visible />
+    ) : (
+      <p class="text-muted-foreground text-center py-4">No combinations data available</p>
+    )}
+  </CardContent>
+</Card>

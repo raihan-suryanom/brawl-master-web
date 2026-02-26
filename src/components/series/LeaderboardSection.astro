@@ -1,0 +1,24 @@
+---
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { LeaderboardTable } from "@/components/LeaderboardTable";
+import { api, type PlayerStats } from "@/lib/api";
+
+export type LeaderboardSectionProps = {
+  seriesId: string;
+};
+
+const { seriesId } = Astro.props as LeaderboardSectionProps;
+
+// Fetch stats at component level
+const stats = await api.getSeriesStats(seriesId) as PlayerStats[];
+---
+
+<Card>
+  <CardHeader>
+    <CardTitle>Leaderboard</CardTitle>
+    <CardDescription>Player rankings by points</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <LeaderboardTable stats={stats} client:only="react" />
+  </CardContent>
+</Card>

@@ -1,76 +1,30 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatsTable } from "@/components/StatsTable";
-import { api, type Series, type Player, type PlayerStats } from "@/lib/api";
-
-const series = await api.getSeries() as Series[];
+import SeriesFilterDropdown from "@/components/stats/SeriesFilterDropdown.astro";
+import StatsTableSection from "@/components/stats/StatsTableSection.astro";
+import SeriesFilterDropdownSkeleton from "@/components/stats/skeletons/SeriesFilterDropdownSkeleton.astro";
+import StatsTableSectionSkeleton from "@/components/stats/skeletons/StatsTableSectionSkeleton.astro";
 
 // Get seriesId from query params
-const url = new URL(Astro.request.url);
-const selectedSeriesId = url.searchParams.get("seriesId");
-
-let stats: PlayerStats[] = [];
-let selectedSeries: Series | null = null;
-
-if (selectedSeriesId) {
-  selectedSeries = series.find((s) => s._id === selectedSeriesId) || null;
-  stats = await api.getSeriesStats(selectedSeriesId) as PlayerStats[];
-} else {
-  // Aggregate stats from all series
-  const allPlayers = await api.getPlayers() as Player[];
-  const allStats = await Promise.all(
-    allPlayers.map((player) => api.getPlayerStats(player._id))
-  ) as PlayerStats[];
-  stats = allStats.sort((a, b) => b.pts - a.pts);
-}
+const selectedSeriesId = Astro.url.searchParams.get("seriesId");
 ---
 
 <Layout title="Overall Stats - Brawl Master Tracker">
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-4xl font-bold">Overall Stats</h1>
-        <p class="text-muted-foreground">
-          {selectedSeries ? `Stats for ${selectedSeries.name}` : "Aggregate stats across all series"}
-        </p>
-      </div>
-    </div>
-    <!-- Series Filter -->
-    <Card>
-      <CardHeader>
-        <CardTitle>Filter by Series</CardTitle>
-        <CardDescription>View stats for a specific series or all series combined</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form method="get" action="/stats" class="flex gap-4 items-end">
-          <div class="flex-1 max-w-md">
-            <label for="seriesId" class="block text-sm font-medium mb-2">
-              Select Series
-            </label>
-            <select
-              id="seriesId"
-              name="seriesId"
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <option value="">All Series</option>
-              {series.map((s) => (
-                <option value={s._id} selected={selectedSeriesId === s._id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            type="submit"
-            class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-          >
-            Apply Filter
-          </button>
-        </form>
-      </CardContent>
-    </Card>
-    <!-- Stats Table -->
-    <StatsTable stats={stats} client:visible />
+    <!-- Series Filter with server:defer -->
+    <SeriesFilterDropdown
+      selectedSeriesId={selectedSeriesId}
+      server:defer
+    >
+      <SeriesFilterDropdownSkeleton slot="fallback" />
+    </SeriesFilterDropdown>
+
+    <!-- Stats Table with server:defer -->
+    <StatsTableSection
+      selectedSeriesId={selectedSeriesId}
+      server:defer
+    >
+      <StatsTableSectionSkeleton slot="fallback" />
+    </StatsTableSection>
   </div>
 </Layout>

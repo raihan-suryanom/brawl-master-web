@@ -1,0 +1,59 @@
+---
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { api, type Series } from "@/lib/api";
+
+export type SeriesFilterProps = {
+  selectedSeriesId: string | null;
+};
+
+const { selectedSeriesId } = Astro.props as SeriesFilterProps;
+
+// Fetch series data at component level
+const series = await api.getSeries() as Series[];
+const selectedSeries = selectedSeriesId ? series.find(s => s._id === selectedSeriesId) : null;
+---
+
+<!-- Page Header -->
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-4xl font-bold">Overall Stats</h1>
+    <p class="text-muted-foreground">
+      {selectedSeries ? `Stats for ${selectedSeries.name}` : "Aggregate stats across all series"}
+    </p>
+  </div>
+</div>
+
+<!-- Series Filter -->
+<Card>
+  <CardHeader>
+    <CardTitle>Filter by Series</CardTitle>
+    <CardDescription>View stats for a specific series or all series combined</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <form method="get" action="/stats" class="flex gap-4 items-end">
+      <div class="flex-1 max-w-md">
+        <label for="seriesId" class="block text-sm font-medium mb-2">
+          Select Series
+        </label>
+        <select
+          id="seriesId"
+          name="seriesId"
+          class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <option value="">All Series</option>
+          {series.map((s) => (
+            <option value={s._id} selected={selectedSeriesId === s._id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <button
+        type="submit"
+        class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+      >
+        Apply Filter
+      </button>
+    </form>
+  </CardContent>
+</Card>

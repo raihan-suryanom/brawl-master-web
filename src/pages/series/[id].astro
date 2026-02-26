@@ -1,118 +1,51 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LeaderboardTable } from "@/components/LeaderboardTable";
-import { PtsProgressionAreaChart } from "@/components/PtsProgressionAreaChart";
-import { WinRatePieChart } from "@/components/WinRatePieChart";
-import { api, type Series, type Game, type PlayerStats, type PtsProgression } from "@/lib/api";
+import SeriesHeader from "@/components/series/SeriesHeader.astro";
+import LeaderboardSection from "@/components/series/LeaderboardSection.astro";
+import PtsProgressionChartSection from "@/components/series/PtsProgressionChartSection.astro";
+import WinRatePieChartSection from "@/components/series/WinRatePieChartSection.astro";
+import GamesListSection from "@/components/series/GamesListSection.astro";
+
+// Import skeletons
+import SeriesHeaderSkeleton from "@/components/series/skeletons/SeriesHeaderSkeleton.astro";
+import LeaderboardSectionSkeleton from "@/components/series/skeletons/LeaderboardSectionSkeleton.astro";
+import PtsProgressionChartSectionSkeleton from "@/components/series/skeletons/PtsProgressionChartSectionSkeleton.astro";
+import WinRatePieChartSectionSkeleton from "@/components/series/skeletons/WinRatePieChartSectionSkeleton.astro";
+import GamesListSectionSkeleton from "@/components/series/skeletons/GamesListSectionSkeleton.astro";
 
 const { id } = Astro.params;
 
 if (!id) {
   return Astro.redirect("/");
 }
-
-const [series, games, stats, ptsProgression] = await Promise.all([
-  api.getSeriesById(id),
-  api.getGames(id),
-  api.getSeriesStats(id),
-  api.getSeriesPtsProgression(id),
-]) as [Series, Game[], PlayerStats[], PtsProgression[]];
 ---
 
-<Layout title={`${series.name} - Brawl Master Tracker`}>
+<Layout title="Series - Brawl Master Tracker">
   <div class="space-y-8">
-    <div>
-      <h1 class="text-4xl font-bold">{series.name}</h1>
-      <p class="text-muted-foreground">
-        {series.participants.length} players • {games.length}/10 games completed
-      </p>
-    </div>
+    <!-- Series Header -->
+    <SeriesHeader seriesId={id} server:defer>
+      <SeriesHeaderSkeleton slot="fallback" />
+    </SeriesHeader>
 
     <!-- Leaderboard -->
-    <Card>
-      <CardHeader>
-        <CardTitle>Leaderboard</CardTitle>
-        <CardDescription>Player rankings by points</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <LeaderboardTable stats={stats} client:visible />
-      </CardContent>
-    </Card>
+    <LeaderboardSection seriesId={id} server:defer>
+      <LeaderboardSectionSkeleton slot="fallback" />
+    </LeaderboardSection>
 
     <!-- Charts -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Points Progression</CardTitle>
-          <CardDescription>How points evolved across games</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <PtsProgressionAreaChart progression={ptsProgression} client:visible />
-        </CardContent>
-      </Card>
+      <PtsProgressionChartSection seriesId={id} server:defer>
+        <PtsProgressionChartSectionSkeleton slot="fallback" />
+      </PtsProgressionChartSection>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Win Distribution</CardTitle>
-          <CardDescription>Wins by player</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <WinRatePieChart stats={stats} client:visible />
-        </CardContent>
-      </Card>
+      <WinRatePieChartSection seriesId={id} server:defer>
+        <WinRatePieChartSectionSkeleton slot="fallback" />
+      </WinRatePieChartSection>
     </div>
 
     <!-- Games List -->
-    <Card>
-      <CardHeader>
-        <CardTitle>Games</CardTitle>
-        <CardDescription>Match history</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div class="space-y-4">
-          {games.map((game: any) => (
-            <div class="border rounded-lg p-4">
-              <div class="flex items-center justify-between mb-3">
-                <span class="text-sm font-medium">Game {game.gameNumber}</span>
-                <span class="text-xs text-muted-foreground">
-                  {new Date(game.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div class={`p-3 rounded ${game.winner === 'teamBlue' ? 'bg-blue-100 dark:bg-blue-950' : 'bg-muted'}`}>
-                  <div class="text-sm font-medium mb-2 text-blue-600 dark:text-blue-400">
-                    Team Blue {game.winner === 'teamBlue' && '👑'}
-                  </div>
-                  <div class="space-y-1">
-                    {game.teamBlue.map((player: any) => (
-                      <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full" style={`background-color: ${player.color}`} />
-                        <img src={player.picture} alt={player.name} class="w-6 h-6 rounded-full object-cover" />
-                        <span class="text-sm">{player.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div class={`p-3 rounded ${game.winner === 'teamRed' ? 'bg-red-100 dark:bg-red-950' : 'bg-muted'}`}>
-                  <div class="text-sm font-medium mb-2 text-red-600 dark:text-red-400">
-                    Team Red {game.winner === 'teamRed' && '👑'}
-                  </div>
-                  <div class="space-y-1">
-                    {game.teamRed.map((player: any) => (
-                      <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full" style={`background-color: ${player.color}`} />
-                        <img src={player.picture} alt={player.name} class="w-6 h-6 rounded-full object-cover" />
-                        <span class="text-sm">{player.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <GamesListSection seriesId={id} server:defer>
+      <GamesListSectionSkeleton slot="fallback" />
+    </GamesListSection>
   </div>
 </Layout>

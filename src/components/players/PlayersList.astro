@@ -1,0 +1,44 @@
+---
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { api, type Player } from "@/lib/api";
+
+// Fetch players at component level
+const players = await api.getPlayers() as Player[];
+---
+
+<div class="space-y-6">
+  <div>
+    <h1 class="text-4xl font-bold">Players</h1>
+    <p class="text-muted-foreground">All registered players</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {players.map((player) => (
+      <a href={`/players/${player._id}`}>
+        <Card className="hover:border-primary transition-colors cursor-pointer">
+          <CardHeader>
+            <div class="flex items-center gap-4">
+              <div class="relative">
+                <img
+                  src={player.picture}
+                  alt={player.name}
+                  class="w-16 h-16 rounded-full object-cover"
+                />
+                <div
+                  class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-background"
+                  style={`background-color: ${player.color}`}
+                />
+              </div>
+              <div>
+                <CardTitle>{player.name}</CardTitle>
+                <CardDescription className="text-xs">
+                  Click to view stats
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+      </a>
+    ))}
+  </div>
+</div>

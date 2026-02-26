@@ -1,0 +1,22 @@
+---
+import { api, type Series, type Game } from "@/lib/api";
+
+export type SeriesHeaderProps = {
+  seriesId: string;
+};
+
+const { seriesId } = Astro.props as SeriesHeaderProps;
+
+// Fetch series and games at component level
+const [series, games] = await Promise.all([
+  api.getSeriesById(seriesId),
+  api.getGames(seriesId),
+]) as [Series, Game[]];
+---
+
+<div>
+  <h1 class="text-4xl font-bold">{series.name}</h1>
+  <p class="text-muted-foreground">
+    {series.participants.length} players • {games.length}/10 games completed
+  </p>
+</div>
