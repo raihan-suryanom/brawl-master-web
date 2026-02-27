@@ -121,10 +121,14 @@ export type PtsProgression = {
 
 export type GameProgression = {
   gameIndex: number;
+  points: number;
   gameNumber: number;
   seriesName: string;
   seriesId: string;
   result: "W" | "L";
   ptsGained: number;
   cumulativePts: number;
+  totalWins: number;
+  highestWinStreak: number;
+  highestLoseStreak: number;
 };
