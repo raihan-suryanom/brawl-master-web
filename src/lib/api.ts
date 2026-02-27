@@ -37,12 +37,11 @@ export const api = {
     }
     return fetcher(`/players/${playerId}/position-history`);
   },
-  // Bundled endpoint for player detail page (single API call)
-  getPlayerFullProfile: (playerId: string, fromSeriesId?: string, toSeriesId?: string) => {
+  getPlayerGameProgression: (playerId: string, fromSeriesId?: string, toSeriesId?: string) => {
     if (fromSeriesId && toSeriesId) {
-      return fetcher(`/players/${playerId}/full-profile?fromSeriesId=${fromSeriesId}&toSeriesId=${toSeriesId}`);
+      return fetcher(`/players/${playerId}/game-progression?fromSeriesId=${fromSeriesId}&toSeriesId=${toSeriesId}`);
     }
-    return fetcher(`/players/${playerId}/full-profile`);
+    return fetcher(`/players/${playerId}/game-progression`);
   },
 };
 
@@ -118,4 +117,14 @@ export type PtsProgression = {
     ws: number;
     ls: number;
   }>;
+};
+
+export type GameProgression = {
+  gameIndex: number;
+  gameNumber: number;
+  seriesName: string;
+  seriesId: string;
+  result: "W" | "L";
+  ptsGained: number;
+  cumulativePts: number;
 };

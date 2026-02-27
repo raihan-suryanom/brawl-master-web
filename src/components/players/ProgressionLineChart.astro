@@ -1,0 +1,30 @@
+---
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { api, type GameProgression } from "@/lib/api";
+import { PlayerProgressionLineChart } from "../ProgressionLineChart";
+
+export type ProgressionLineChartProps = {
+  playerId: string;
+  fromSeriesId: string | null;
+  toSeriesId: string | null;
+};
+
+const { playerId, fromSeriesId, toSeriesId } = Astro.props as ProgressionLineChartProps;
+
+// Fetch game progression at component level
+const progression = await api.getPlayerGameProgression(
+  playerId,
+  fromSeriesId || undefined,
+  toSeriesId || undefined
+) as GameProgression[];
+---
+
+<Card>
+  <CardHeader>
+    <CardTitle>Points Progression</CardTitle>
+    <CardDescription>Cumulative points gained game by game</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <PlayerProgressionLineChart progression={progression} client:visible />
+  </CardContent>
+</Card>

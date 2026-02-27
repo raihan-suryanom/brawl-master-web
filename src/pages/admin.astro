@@ -1,0 +1,18 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import AdminDataSection from "@/components/admin/AdminDataSection.astro";
+import AdminDataSectionSkeleton from "@/components/admin/skeletons/AdminDataSectionSkeleton.astro";
+---
+
+<Layout title="Admin - Brawl Master Tracker">
+  <div class="space-y-6 max-w-4xl mx-auto">
+    <div>
+      <h1 class="text-4xl font-bold">Admin Panel</h1>
+      <p class="text-muted-foreground">Create new series and record game results</p>
+    </div>
+
+    <AdminDataSection server:defer>
+      <AdminDataSectionSkeleton slot="fallback" />
+    </AdminDataSection>
+  </div>
+</Layout>

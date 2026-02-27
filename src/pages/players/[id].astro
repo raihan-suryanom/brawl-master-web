@@ -4,6 +4,7 @@ import Profile from "@/components/players/Profile.astro";
 import StatsCard from "@/components/players/StatsCard.astro";
 import RangeFilter from "@/components/players/RangeFilter.astro";
 import RadarChart from "@/components/players/RadarChart.astro";
+import ProgressionLineChart from "@/components/players/ProgressionLineChart.astro";
 import DuoCombinations from "@/components/players/DuoCombinations.astro";
 import TrioCombinations from "@/components/players/TrioCombinations.astro";
 
@@ -11,6 +12,7 @@ import TrioCombinations from "@/components/players/TrioCombinations.astro";
 import ProfileSkeleton from "@/components/players/skeletons/ProfileSkeleton.astro";
 import RangeFilterSkeleton from "@/components/players/skeletons/RangeFilterSkeleton.astro";
 import RadarChartSkeleton from "@/components/players/skeletons/RadarChartSkeleton.astro";
+import ProgressionLineChartSkeleton from "@/components/players/skeletons/ProgressionLineChartSkeleton.astro";
 import StatsCardSkeleton from "@/components/players/skeletons/StatsCardSkeleton.astro";
 import DuoCombinationsSkeleton from "@/components/players/skeletons/DuoCombinationsSkeleton.astro";
 import TrioCombinationsSkeleton from "@/components/players/skeletons/TrioCombinationsSkeleton.astro";
@@ -57,6 +59,16 @@ const toSeriesId = url.get("toSeriesId");
     >
       <RadarChartSkeleton slot="fallback" />
     </RadarChart>
+
+    <!-- Points Progression Line Chart -->
+    <ProgressionLineChart
+      playerId={id}
+      fromSeriesId={fromSeriesId}
+      toSeriesId={toSeriesId}
+      server:defer
+    >
+      <ProgressionLineChartSkeleton slot="fallback" />
+    </ProgressionLineChart>
 
     <!-- Overall Stats Cards -->
     <StatsCard

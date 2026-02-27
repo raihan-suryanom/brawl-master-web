@@ -1,0 +1,10 @@
+---
+import { AdminForms } from "@/components/AdminForms";
+import { api, type Player, type Series } from "@/lib/api";
+
+// Fetch players and series at component level
+const players = await api.getPlayers() as Player[];
+const series = await api.getSeries() as Series[];
+---
+
+<AdminForms players={players} series={series} client:only="react" />

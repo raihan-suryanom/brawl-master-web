@@ -19,6 +19,6 @@ const ptsProgression = await api.getSeriesPtsProgression(seriesId) as PtsProgres
     <CardDescription>How points evolved across games</CardDescription>
   </CardHeader>
   <CardContent>
-    <PtsProgressionAreaChart progression={ptsProgression} client:only="react" />
+    <PtsProgressionAreaChart progression={ptsProgression} client:visible />
   </CardContent>
 </Card>

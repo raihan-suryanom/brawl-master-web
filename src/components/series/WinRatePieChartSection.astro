@@ -19,6 +19,6 @@ const stats = await api.getSeriesStats(seriesId) as PlayerStats[];
     <CardDescription>Wins by player</CardDescription>
   </CardHeader>
   <CardContent>
-    <WinRatePieChart stats={stats} client:only="react" />
+    <WinRatePieChart stats={stats} client:visible />
   </CardContent>
 </Card>

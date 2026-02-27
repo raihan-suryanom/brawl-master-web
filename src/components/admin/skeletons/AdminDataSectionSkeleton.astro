@@ -1,0 +1,46 @@
+---
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+---
+
+<div class="space-y-4">
+  <!-- Tabs skeleton -->
+  <div class="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 animate-pulse">
+    <div class="h-8 w-32 bg-muted-foreground/20 rounded mx-1"></div>
+    <div class="h-8 w-32 bg-muted-foreground/20 rounded mx-1"></div>
+  </div>
+
+  <!-- Form card skeleton -->
+  <Card>
+    <CardHeader>
+      <div class="space-y-2 animate-pulse">
+        <div class="h-6 w-48 bg-muted rounded"></div>
+        <div class="h-4 w-64 bg-muted rounded"></div>
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div class="space-y-6 animate-pulse">
+        <!-- Input fields -->
+        <div class="space-y-2">
+          <div class="h-4 w-24 bg-muted rounded"></div>
+          <div class="h-10 w-full bg-muted rounded"></div>
+        </div>
+
+        <!-- Multi-select grid -->
+        <div class="space-y-2">
+          <div class="h-4 w-32 bg-muted rounded"></div>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {[1, 2, 3, 4, 5, 6].map(() => (
+              <div class="flex items-center gap-2 p-3 rounded-lg border border-border">
+                <div class="w-10 h-10 rounded-full bg-muted"></div>
+                <div class="h-4 w-20 bg-muted rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Submit button -->
+        <div class="h-10 w-full bg-muted rounded"></div>
+      </div>
+    </CardContent>
+  </Card>
+</div>
