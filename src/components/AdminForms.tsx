@@ -128,16 +128,31 @@ export function AdminForms({ players, series }: AdminFormsProps) {
 
     setSeriesLoading(true);
     try {
+      const adminPassword = sessionStorage.getItem("adminPassword");
+      
       const response = await fetch(`${API_BASE_URL}/series`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-admin-password": adminPassword || "",
+        },
         body: JSON.stringify({
           name: seriesName,
           participants: selectedParticipants,
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to create series");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.log({errorData})
+        if (errorData.error === "INVALID_PASSWORD") {
+          alert("❌ Invalid admin password. Please refresh and login again.");
+          sessionStorage.removeItem("adminPassword");
+          window.location.reload();
+          return;
+        }
+        throw new Error(errorData.message || "Failed to create series");
+      }
 
       alert("✅ Series created successfully!");
       // Redirect to series list
@@ -179,9 +194,14 @@ export function AdminForms({ players, series }: AdminFormsProps) {
 
     setGameLoading(true);
     try {
+      const adminPassword = sessionStorage.getItem("adminPassword");
+      
       const response = await fetch(`${API_BASE_URL}/series/${selectedSeries}/games`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-admin-password": adminPassword || "",
+        },
         body: JSON.stringify({
           gameNumber,
           teamBlue,
@@ -192,6 +212,12 @@ export function AdminForms({ players, series }: AdminFormsProps) {
 
       if (!response.ok) {
         const error = await response.json();
+        if (error.error === "INVALID_PASSWORD") {
+          alert("❌ Invalid admin password. Please refresh and login again.");
+          sessionStorage.removeItem("adminPassword");
+          window.location.reload();
+          return;
+        }
         throw new Error(error.message || "Failed to create game");
       }
 

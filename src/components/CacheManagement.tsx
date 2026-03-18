@@ -12,11 +12,25 @@ export function CacheManagement() {
     if (!confirmed) return;
 
     try {
+      const adminPassword = sessionStorage.getItem("adminPassword");
+      
       const response = await fetch(`${API_BASE_URL}/admin/clear-cache`, {
         method: "POST",
+        headers: {
+          "x-admin-password": adminPassword || "",
+        },
       });
 
-      if (!response.ok) throw new Error("Failed to clear cache");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (errorData.error === "INVALID_PASSWORD") {
+          alert("❌ Invalid admin password. Please refresh and login again.");
+          sessionStorage.removeItem("adminPassword");
+          window.location.reload();
+          return;
+        }
+        throw new Error("Failed to clear cache");
+      }
 
       const result = await response.json();
       alert(`✅ ${result.message}`);
@@ -28,11 +42,25 @@ export function CacheManagement() {
   // Clear specific cache type
   const handleClearCacheType = async (type: string) => {
     try {
+      const adminPassword = sessionStorage.getItem("adminPassword");
+      
       const response = await fetch(`${API_BASE_URL}/admin/clear-cache/${type}`, {
         method: "POST",
+        headers: {
+          "x-admin-password": adminPassword || "",
+        },
       });
 
-      if (!response.ok) throw new Error("Failed to clear cache");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (errorData.error === "INVALID_PASSWORD") {
+          alert("❌ Invalid admin password. Please refresh and login again.");
+          sessionStorage.removeItem("adminPassword");
+          window.location.reload();
+          return;
+        }
+        throw new Error("Failed to clear cache");
+      }
 
       const result = await response.json();
       alert(`✅ ${result.message}`);

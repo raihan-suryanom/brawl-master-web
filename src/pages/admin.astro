@@ -5,38 +5,45 @@ import AdminDataSectionSkeleton from "@/components/admin/skeletons/AdminDataSect
 import TeamPickerSection from "@/components/team-picker/TeamPickerSection.astro";
 import TeamPickerSectionSkeleton from "@/components/team-picker/skeletons/TeamPickerSectionSkeleton.astro";
 import { CacheManagement } from "@/components/CacheManagement";
+import { AdminPasswordGate } from "@/components/AdminPasswordGate";
 ---
 
 <Layout title="Admin - Brawl Master Tracker">
   <div class="space-y-12 max-w-5xl mx-auto">
-    <!-- Admin Panel Section -->
-    <div class="space-y-6">
-      <div>
-        <h1 class="text-4xl font-bold">Admin Panel</h1>
-        <p class="text-muted-foreground">Create new series and record game results</p>
+    <!-- Password Gate (shows form or logout button) -->
+    <AdminPasswordGate client:load />
+    
+    <!-- Admin Content (hidden by default, shown after auth) -->
+    <div id="admin-content" style="display: none;">
+      <!-- Admin Panel Section -->
+      <div class="space-y-6">
+        <div>
+          <h1 class="text-4xl font-bold">Admin Panel</h1>
+          <p class="text-muted-foreground">Create new series and record game results</p>
+        </div>
+
+        <AdminDataSection server:defer>
+          <AdminDataSectionSkeleton slot="fallback" />
+        </AdminDataSection>
       </div>
 
-      <AdminDataSection server:defer>
-        <AdminDataSectionSkeleton slot="fallback" />
-      </AdminDataSection>
-    </div>
+      <!-- Divider -->
+      <div class="border-t border-dashed"></div>
 
-    <!-- Divider -->
-    <div class="border-t border-dashed"></div>
+      <!-- Team Picker Section -->
+      <div class="space-y-6">
+        <div>
+          <h2 class="text-3xl font-bold">🎰 Team Picker</h2>
+          <p class="text-muted-foreground">Randomly shuffle teams for fair matchmaking</p>
+        </div>
 
-    <!-- Team Picker Section -->
-    <div class="space-y-6">
-      <div>
-        <h2 class="text-3xl font-bold">🎰 Team Picker</h2>
-        <p class="text-muted-foreground">Randomly shuffle teams for fair matchmaking</p>
+        <TeamPickerSection server:defer>
+          <TeamPickerSectionSkeleton slot="fallback" />
+        </TeamPickerSection>
       </div>
 
-      <TeamPickerSection server:defer>
-        <TeamPickerSectionSkeleton slot="fallback" />
-      </TeamPickerSection>
+      <!-- Cache Management at Bottom -->
+      <CacheManagement client:visible />
     </div>
-
-    <!-- Cache Management at Bottom -->
-    <CacheManagement client:visible />
   </div>
 </Layout>
