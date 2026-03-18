@@ -1,0 +1,61 @@
+---
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CombinationsTable } from "@/components/CombinationsTable";
+import { api, type PlayerCombination } from "@/lib/api";
+
+export type BestCombinationsSectionProps = {
+  selectedSeriesId: string | null;
+};
+
+const { selectedSeriesId } = Astro.props as BestCombinationsSectionProps;
+
+// Fetch best 2 and 3 combinations
+const [combos2, combos3] = await Promise.all([
+  selectedSeriesId 
+    ? api.getBestCombinations(2, selectedSeriesId)
+    : api.getBestCombinations(2),
+  selectedSeriesId
+    ? api.getBestCombinations(3, selectedSeriesId)
+    : api.getBestCombinations(3),
+]) as [PlayerCombination[], PlayerCombination[]];
+
+// Check if any have insufficient data flag
+const hasInsufficientData2 = combos2.some(c => c.insufficientData);
+const hasInsufficientData3 = combos3.some(c => c.insufficientData);
+---
+
+<!-- Best Duo Combinations -->
+<Card>
+  <CardHeader>
+    <CardTitle>Best Duo Combinations</CardTitle>
+    <CardDescription>
+      Top performing 2-player combinations across {selectedSeriesId ? 'selected series' : 'all series'}
+      {hasInsufficientData2 && <span class="text-amber-600 dark:text-amber-500"> • Limited data (&lt;5 games)</span>}
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+    {combos2.length === 0 ? (
+      <p class="text-muted-foreground text-center py-8">No duo combinations found. Play more games!</p>
+    ) : (
+      <CombinationsTable combinations={combos2} client:visible />
+    )}
+  </CardContent>
+</Card>
+
+<!-- Best Trio Combinations -->
+<Card>
+  <CardHeader>
+    <CardTitle>Best Trio Combinations</CardTitle>
+    <CardDescription>
+      Top performing 3-player combinations across {selectedSeriesId ? 'selected series' : 'all series'}
+      {hasInsufficientData3 && <span class="text-amber-600 dark:text-amber-500"> • Limited data (&lt;5 games)</span>}
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+    {combos3.length === 0 ? (
+      <p class="text-muted-foreground text-center py-8">No trio combinations found. Play more games!</p>
+    ) : (
+      <CombinationsTable combinations={combos3} client:visible />
+    )}
+  </CardContent>
+</Card>

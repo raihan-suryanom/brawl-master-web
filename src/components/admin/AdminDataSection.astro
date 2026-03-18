@@ -7,4 +7,4 @@ const players = await api.getPlayers() as Player[];
 const series = await api.getSeries() as Series[];
 ---
 
-<AdminForms players={players} series={series} client:only="react" />
+<AdminForms players={players} series={series} client:visible />

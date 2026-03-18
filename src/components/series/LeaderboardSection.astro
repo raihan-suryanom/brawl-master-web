@@ -1,16 +1,25 @@
 ---
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LeaderboardTable } from "@/components/LeaderboardTable";
-import { api, type PlayerStats } from "@/lib/api";
+import { api, type PlayerStats, type Game, type Series } from "@/lib/api";
 
 export type LeaderboardSectionProps = {
   seriesId: string;
+  gameRange: string | null;
 };
 
-const { seriesId } = Astro.props as LeaderboardSectionProps;
+const { seriesId, gameRange } = Astro.props as LeaderboardSectionProps;
 
-// Fetch stats at component level
-const stats = await api.getSeriesStats(seriesId) as PlayerStats[];
+// Fetch stats, games, and series info
+const maxGameNumber = gameRange ? parseInt(gameRange) : undefined;
+const [stats, games, series] = await Promise.all([
+  api.getSeriesStats(seriesId, maxGameNumber),
+  api.getGames(seriesId), // Get all games to know total
+  api.getSeriesById(seriesId), // Get series info
+]) as [PlayerStats[], Game[], Series];
+
+const totalGames = games.length;
+const currentGameRange = gameRange ? parseInt(gameRange) : null;
 ---
 
 <Card>
@@ -19,6 +28,13 @@ const stats = await api.getSeriesStats(seriesId) as PlayerStats[];
     <CardDescription>Player rankings by points</CardDescription>
   </CardHeader>
   <CardContent>
-    <LeaderboardTable stats={stats} client:visible />
+    <LeaderboardTable 
+      stats={stats} 
+      totalGames={totalGames}
+      currentGameRange={currentGameRange}
+      totalPlayers={series.participants.length}
+      completedGames={games.length}
+      client:visible 
+    />
   </CardContent>
 </Card>

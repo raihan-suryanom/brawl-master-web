@@ -2,8 +2,10 @@
 import Layout from "@/layouts/Layout.astro";
 import SeriesFilterDropdown from "@/components/stats/SeriesFilterDropdown.astro";
 import StatsTableSection from "@/components/stats/StatsTableSection.astro";
+import BestCombinationsSection from "@/components/stats/BestCombinationsSection.astro";
 import SeriesFilterDropdownSkeleton from "@/components/stats/skeletons/SeriesFilterDropdownSkeleton.astro";
 import StatsTableSectionSkeleton from "@/components/stats/skeletons/StatsTableSectionSkeleton.astro";
+import BestCombinationsSectionSkeleton from "@/components/stats/skeletons/BestCombinationsSectionSkeleton.astro";
 
 // Get seriesId from query params
 const selectedSeriesId = Astro.url.searchParams.get("seriesId");
@@ -26,5 +28,13 @@ const selectedSeriesId = Astro.url.searchParams.get("seriesId");
     >
       <StatsTableSectionSkeleton slot="fallback" />
     </StatsTableSection>
+
+    <!-- Best Combinations with server:defer -->
+    <BestCombinationsSection
+      selectedSeriesId={selectedSeriesId}
+      server:defer
+    >
+      <BestCombinationsSectionSkeleton slot="fallback" />
+    </BestCombinationsSection>
   </div>
 </Layout>

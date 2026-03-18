@@ -5,12 +5,14 @@ import { api, type PlayerStats } from "@/lib/api";
 
 export type WinRatePieChartSectionProps = {
   seriesId: string;
+  gameRange: string | null;
 };
 
-const { seriesId } = Astro.props as WinRatePieChartSectionProps;
+const { seriesId, gameRange } = Astro.props as WinRatePieChartSectionProps;
 
-// Fetch stats at component level
-const stats = await api.getSeriesStats(seriesId) as PlayerStats[];
+// Fetch stats at component level with optional game range filter
+const maxGameNumber = gameRange ? parseInt(gameRange) : undefined;
+const stats = await api.getSeriesStats(seriesId, maxGameNumber) as PlayerStats[];
 ---
 
 <Card>

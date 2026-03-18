@@ -14,6 +14,7 @@ import WinRatePieChartSectionSkeleton from "@/components/series/skeletons/WinRat
 import GamesListSectionSkeleton from "@/components/series/skeletons/GamesListSectionSkeleton.astro";
 
 const { id } = Astro.params;
+const gameRange = Astro.url.searchParams.get("gameRange");
 
 if (!id) {
   return Astro.redirect("/");
@@ -22,30 +23,30 @@ if (!id) {
 
 <Layout title="Series - Brawl Master Tracker">
   <div class="space-y-8">
-    <!-- Series Header -->
-    <SeriesHeader seriesId={id} server:defer>
+    <!-- Series Header with Navigation & Slider -->
+    <SeriesHeader seriesId={id} gameRange={gameRange} server:defer>
       <SeriesHeaderSkeleton slot="fallback" />
     </SeriesHeader>
 
     <!-- Leaderboard -->
-    <LeaderboardSection seriesId={id} server:defer>
+    <LeaderboardSection seriesId={id} gameRange={gameRange} server:defer>
       <LeaderboardSectionSkeleton slot="fallback" />
     </LeaderboardSection>
 
+    <!-- Match History -->
+    <GamesListSection seriesId={id} gameRange={gameRange} server:defer>
+      <GamesListSectionSkeleton slot="fallback" />
+    </GamesListSection>
+
     <!-- Charts -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <PtsProgressionChartSection seriesId={id} server:defer>
+      <PtsProgressionChartSection seriesId={id} gameRange={gameRange} server:defer>
         <PtsProgressionChartSectionSkeleton slot="fallback" />
       </PtsProgressionChartSection>
 
-      <WinRatePieChartSection seriesId={id} server:defer>
+      <WinRatePieChartSection seriesId={id} gameRange={gameRange} server:defer>
         <WinRatePieChartSectionSkeleton slot="fallback" />
       </WinRatePieChartSection>
     </div>
-
-    <!-- Games List -->
-    <GamesListSection seriesId={id} server:defer>
-      <GamesListSectionSkeleton slot="fallback" />
-    </GamesListSection>
   </div>
 </Layout>

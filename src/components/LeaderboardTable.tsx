@@ -7,12 +7,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { PlayerStats } from "@/lib/api";
+import { GameRangeSlider } from "./GameRangeSlider";
 
 interface LeaderboardTableProps {
   stats: PlayerStats[];
+  totalGames?: number;
+  currentGameRange?: number | null;
+  totalPlayers?: number;
+  completedGames?: number;
 }
 
-export function LeaderboardTable({ stats }: LeaderboardTableProps) {
+export function LeaderboardTable({ 
+  stats, 
+  totalGames, 
+  currentGameRange,
+  totalPlayers,
+  completedGames 
+}: LeaderboardTableProps) {
   // Get zone styling based on backend-calculated zone
   const getZoneStyle = (zone?: string) => {
     switch (zone) {
@@ -41,9 +52,22 @@ export function LeaderboardTable({ stats }: LeaderboardTableProps) {
 
   // Check if any zones are active (for showing legend)
   const hasActiveZones = stats.some(s => s.zone && s.zone !== "none");
+  
+  // Determine effective game range (use slider value or total games)
+  const effectiveGameRange = currentGameRange || totalGames || 10;
+  
+  // Show Max Pts column if game range < 10
+  const showMaxPts = effectiveGameRange < 10;
 
   return (
     <div className="space-y-4">
+      {/* Series Info */}
+      {totalPlayers && completedGames !== undefined && (
+        <div className="text-sm text-muted-foreground">
+          {totalPlayers} players • {completedGames}/10 games completed
+        </div>
+      )}
+
       {/* Legend - only show if zones are active */}
       {hasActiveZones && (
         <div className="flex flex-wrap gap-4 text-sm">
@@ -73,7 +97,8 @@ export function LeaderboardTable({ stats }: LeaderboardTableProps) {
               <TableHead className="text-center">WS</TableHead>
               <TableHead className="text-center">LS</TableHead>
               <TableHead className="text-center">Pts</TableHead>
-              {/* <TableHead className="text-center">Max Pts</TableHead> */}
+              {showMaxPts && <TableHead className="text-center">Min Pts</TableHead>}
+              {showMaxPts && <TableHead className="text-center">Max Pts</TableHead>}
               <TableHead className="text-center">WR%</TableHead>
             </TableRow>
           </TableHeader>
@@ -123,9 +148,16 @@ export function LeaderboardTable({ stats }: LeaderboardTableProps) {
                   <TableCell className="text-center font-bold text-lg">
                     {stat.pts}
                   </TableCell>
-                  {/* <TableCell className="text-center text-muted-foreground text-sm">
-                    {stat.maxPossiblePts !== undefined ? stat.maxPossiblePts : '-'}
-                  </TableCell> */}
+                  {showMaxPts && (
+                    <TableCell className="text-center text-muted-foreground text-sm">
+                      {stat.minPossiblePts !== undefined ? stat.minPossiblePts : '-'}
+                    </TableCell>
+                  )}
+                  {showMaxPts && (
+                    <TableCell className="text-center text-muted-foreground text-sm">
+                      {stat.maxPossiblePts !== undefined ? stat.maxPossiblePts : '-'}
+                    </TableCell>
+                  )}
                   <TableCell className="text-center font-medium">
                     {stat.winRate.toFixed(1)}%
                   </TableCell>
@@ -139,8 +171,19 @@ export function LeaderboardTable({ stats }: LeaderboardTableProps) {
       {/* Info Box */}
       <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg space-y-1">
         <div>
-          <span className="font-semibold">Tiebreaker Rules:</span> Pts → Total Win → Win Streak → Win Rate → Lose Streak (lower is better) → First Loss Game
+          <span className="font-semibold">Tiebreaker Rules:</span> Pts → Total Win → Win Streak → Win Rate → Lose Streak (lower is better) → <span className="font-medium">First Loss Game (Series 1-16)</span> / <span className="font-medium">Last Game Result (Series 17+)</span>
         </div>
+        <div className="text-[10px] opacity-75 mt-1">
+          * Series 1-16 use "First Loss Game" (who held out longer wins) • Series 17+ use "Last Game Result" (winner of final game wins)
+        </div>
+        
+        {/* Game Range Slider */}
+        {totalGames && totalGames > 1 && (
+          <GameRangeSlider 
+            totalGames={totalGames}
+            currentGameRange={currentGameRange || null}
+          />
+        )}
       </div>
     </div>
   );

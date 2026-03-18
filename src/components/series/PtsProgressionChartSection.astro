@@ -5,12 +5,14 @@ import { api, type PtsProgression } from "@/lib/api";
 
 export type PtsProgressionChartSectionProps = {
   seriesId: string;
+  gameRange: string | null;
 };
 
-const { seriesId } = Astro.props as PtsProgressionChartSectionProps;
+const { seriesId, gameRange } = Astro.props as PtsProgressionChartSectionProps;
 
-// Fetch pts progression at component level
-const ptsProgression = await api.getSeriesPtsProgression(seriesId) as PtsProgression[];
+// Fetch pts progression at component level with optional game range filter
+const maxGameNumber = gameRange ? parseInt(gameRange) : undefined;
+const ptsProgression = await api.getSeriesPtsProgression(seriesId, maxGameNumber) as PtsProgression[];
 ---
 
 <Card>

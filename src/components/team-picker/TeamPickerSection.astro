@@ -1,0 +1,9 @@
+---
+import { TeamPicker } from "@/components/TeamPicker";
+import { api, type Series } from "@/lib/api";
+
+// Fetch series at component level
+const series = await api.getSeries() as Series[];
+---
+
+<TeamPicker series={series} client:visible />

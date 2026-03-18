@@ -1,4 +1,4 @@
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import type { PtsProgression } from "@/lib/api";
 
 interface PtsProgressionAreaChartProps {
@@ -57,15 +57,7 @@ export function PtsProgressionAreaChart({ progression }: PtsProgressionAreaChart
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <AreaChart data={chartData}>
-        <defs>
-          {progression.map((player, index) => (
-            <linearGradient key={player.id} id={`color${index}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={player.color} stopOpacity={0.8}/>
-              <stop offset="95%" stopColor={player.color} stopOpacity={0.1}/>
-            </linearGradient>
-          ))}
-        </defs>
+      <LineChart data={chartData}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis 
           dataKey="gameNumber" 
@@ -76,18 +68,18 @@ export function PtsProgressionAreaChart({ progression }: PtsProgressionAreaChart
         />
         <Tooltip content={<CustomTooltip />} />
         <Legend />
-        {progression.map((player, index) => (
-          <Area
+        {progression.map((player) => (
+          <Line
             key={player.id}
             type="monotone"
             dataKey={player.name}
             stroke={player.color}
-            strokeWidth={2}
-            fillOpacity={1}
-            fill={`url(#color${index})`}
+            strokeWidth={3}
+            dot={{ fill: player.color, r: 4 }}
+            activeDot={{ r: 6 }}
           />
         ))}
-      </AreaChart>
+      </LineChart>
     </ResponsiveContainer>
   );
 }

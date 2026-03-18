@@ -2,17 +2,41 @@
 import Layout from "@/layouts/Layout.astro";
 import AdminDataSection from "@/components/admin/AdminDataSection.astro";
 import AdminDataSectionSkeleton from "@/components/admin/skeletons/AdminDataSectionSkeleton.astro";
+import TeamPickerSection from "@/components/team-picker/TeamPickerSection.astro";
+import TeamPickerSectionSkeleton from "@/components/team-picker/skeletons/TeamPickerSectionSkeleton.astro";
+import { CacheManagement } from "@/components/CacheManagement";
 ---
 
 <Layout title="Admin - Brawl Master Tracker">
-  <div class="space-y-6 max-w-4xl mx-auto">
-    <div>
-      <h1 class="text-4xl font-bold">Admin Panel</h1>
-      <p class="text-muted-foreground">Create new series and record game results</p>
+  <div class="space-y-12 max-w-5xl mx-auto">
+    <!-- Admin Panel Section -->
+    <div class="space-y-6">
+      <div>
+        <h1 class="text-4xl font-bold">Admin Panel</h1>
+        <p class="text-muted-foreground">Create new series and record game results</p>
+      </div>
+
+      <AdminDataSection server:defer>
+        <AdminDataSectionSkeleton slot="fallback" />
+      </AdminDataSection>
     </div>
 
-    <AdminDataSection server:defer>
-      <AdminDataSectionSkeleton slot="fallback" />
-    </AdminDataSection>
+    <!-- Divider -->
+    <div class="border-t border-dashed"></div>
+
+    <!-- Team Picker Section -->
+    <div class="space-y-6">
+      <div>
+        <h2 class="text-3xl font-bold">🎰 Team Picker</h2>
+        <p class="text-muted-foreground">Randomly shuffle teams for fair matchmaking</p>
+      </div>
+
+      <TeamPickerSection server:defer>
+        <TeamPickerSectionSkeleton slot="fallback" />
+      </TeamPickerSection>
+    </div>
+
+    <!-- Cache Management at Bottom -->
+    <CacheManagement client:visible />
   </div>
 </Layout>

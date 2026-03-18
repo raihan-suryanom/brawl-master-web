@@ -1,22 +1,23 @@
 ---
-import { api, type Series, type Game } from "@/lib/api";
+import { api, type Series } from "@/lib/api";
+import { SeriesNavigation } from "./SeriesNavigation";
 
 export type SeriesHeaderProps = {
   seriesId: string;
+  gameRange: string | null;
 };
 
 const { seriesId } = Astro.props as SeriesHeaderProps;
 
-// Fetch series and games at component level
-const [series, games] = await Promise.all([
-  api.getSeriesById(seriesId),
-  api.getGames(seriesId),
-]) as [Series, Game[]];
+// Fetch all series for navigation
+const allSeries = await api.getSeries() as Series[];
 ---
 
 <div>
-  <h1 class="text-4xl font-bold">{series.name}</h1>
-  <p class="text-muted-foreground">
-    {series.participants.length} players • {games.length}/10 games completed
-  </p>
+  <!-- Series Navigation (Prev/Next only) -->
+  <SeriesNavigation 
+    allSeries={allSeries}
+    currentSeriesId={seriesId}
+    client:visible
+  />
 </div>

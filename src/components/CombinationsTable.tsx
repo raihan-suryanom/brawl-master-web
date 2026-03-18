@@ -10,7 +10,7 @@ import type { PlayerCombination } from "@/lib/api";
 
 interface CombinationsTableProps {
   combinations: PlayerCombination[];
-  size: 2 | 3;
+  size?: 2 | 3;
 }
 
 export function CombinationsTable({ combinations, size }: CombinationsTableProps) {
@@ -23,6 +23,7 @@ export function CombinationsTable({ combinations, size }: CombinationsTableProps
           <TableHead className="text-center">Wins</TableHead>
           <TableHead className="text-center">Losses</TableHead>
           <TableHead className="text-center">WR%</TableHead>
+          <TableHead className="text-center">Score</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -54,6 +55,9 @@ export function CombinationsTable({ combinations, size }: CombinationsTableProps
             <TableCell className="text-center text-red-600">{combo.losses}</TableCell>
             <TableCell className="text-center font-medium">
               {combo.winRate.toFixed(1)}%
+            </TableCell>
+            <TableCell className="text-center font-bold text-primary">
+              {combo.score !== undefined ? combo.score.toFixed(1) : '-'}
             </TableCell>
           </TableRow>
         ))}

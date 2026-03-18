@@ -18,11 +18,14 @@ export const api = {
   getSeriesById: (id: string) => fetcher(`/series/${id}`),
   
   // Games
-  getGames: (seriesId: string) => fetcher(`/series/${seriesId}/games`),
+  getGames: (seriesId: string, maxGameNumber?: number) => 
+    fetcher(`/series/${seriesId}/games${maxGameNumber ? `?maxGameNumber=${maxGameNumber}` : ""}`),
   
   // Stats
-  getSeriesStats: (seriesId: string) => fetcher(`/series/${seriesId}/stats`),
-  getSeriesPtsProgression: (seriesId: string) => fetcher(`/series/${seriesId}/pts-progression`),
+  getSeriesStats: (seriesId: string, maxGameNumber?: number) => 
+    fetcher(`/series/${seriesId}/stats${maxGameNumber ? `?maxGameNumber=${maxGameNumber}` : ""}`),
+  getSeriesPtsProgression: (seriesId: string, maxGameNumber?: number) => 
+    fetcher(`/series/${seriesId}/pts-progression${maxGameNumber ? `?maxGameNumber=${maxGameNumber}` : ""}`),
   getPlayerStats: (playerId: string, seriesId?: string) => 
     fetcher(`/players/${playerId}/stats${seriesId ? `?seriesId=${seriesId}` : ""}`),
   getPlayerStatsRange: (playerId: string, fromSeriesId: string, toSeriesId: string) =>
@@ -43,6 +46,15 @@ export const api = {
     }
     return fetcher(`/players/${playerId}/game-progression`);
   },
+  // Aggregate stats
+  getBestCombinations: (size: 2 | 3, seriesId?: string) => {
+    if (seriesId) {
+      return fetcher(`/aggregate-stats/best-combinations?size=${size}&fromSeriesId=${seriesId}&toSeriesId=${seriesId}`);
+    }
+    return fetcher(`/aggregate-stats/best-combinations?size=${size}`);
+  },
+  getBestCombinationsRange: (size: 2 | 3, fromSeriesId: string, toSeriesId: string) =>
+    fetcher(`/aggregate-stats/best-combinations?size=${size}&fromSeriesId=${fromSeriesId}&toSeriesId=${toSeriesId}`),
 };
 
 export type Player = {
@@ -81,10 +93,12 @@ export type PlayerStats = {
   totalWin: number;
   highestWinStreak: number;
   highestLoseStreak: number;
-  firstLossGameNumber: number;
+  firstLossGameNumber: number; // Old tiebreaker (series 1-16)
+  lastGameResult: "W" | "L"; // New tiebreaker (series 17+)
   pts: number;
   totalGames: number;
   winRate: number;
+  minPossiblePts?: number;
   maxPossiblePts?: number;
   zone?: "none" | "champion" | "safe" | "last";
   lastFiveGames?: Array<{
@@ -104,6 +118,8 @@ export type PlayerCombination = {
   losses: number;
   totalGames: number;
   winRate: number;
+  score?: number;
+  insufficientData?: boolean;
 };
 
 export type PtsProgression = {

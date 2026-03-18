@@ -4,61 +4,95 @@ import { api, type Game } from "@/lib/api";
 
 export type GamesListSectionProps = {
   seriesId: string;
+  gameRange: string | null;
 };
 
-const { seriesId } = Astro.props as GamesListSectionProps;
+const { seriesId, gameRange } = Astro.props as GamesListSectionProps;
 
-// Fetch games at component level
-const games = await api.getGames(seriesId) as Game[];
+// Fetch games at component level with optional game range filter
+const maxGameNumber = gameRange ? parseInt(gameRange) : undefined;
+const games = await api.getGames(seriesId, maxGameNumber) as Game[];
+
+// Helper to sort players alphabetically
+const sortPlayers = (players: any[]) => {
+  return [...players].sort((a, b) => a.name.localeCompare(b.name));
+};
 ---
 
 <Card>
   <CardHeader>
-    <CardTitle>Games</CardTitle>
-    <CardDescription>Match history</CardDescription>
+    <CardTitle>Match History</CardTitle>
+    <CardDescription>{games.length} game{games.length !== 1 ? 's' : ''} played</CardDescription>
   </CardHeader>
   <CardContent>
-    <div class="space-y-4">
-      {games.map((game) => (
-        <div class="border rounded-lg p-4">
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-medium">Game {game.gameNumber}</span>
-            <span class="text-xs text-muted-foreground">
-              {new Date(game.createdAt).toLocaleDateString()}
-            </span>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div class={`p-3 rounded ${game.winner === 'teamBlue' ? 'bg-blue-100 dark:bg-blue-950' : 'bg-muted'}`}>
-              <div class="text-sm font-medium mb-2 text-blue-600 dark:text-blue-400">
-                Team Blue {game.winner === 'teamBlue' && '👑'}
+    <!-- Horizontal scroll container -->
+    <div class="overflow-x-auto pb-4">
+      <div class="flex gap-4 min-w-min">
+        {games.map((game) => {
+          const sortedBlue = sortPlayers(game.teamBlue);
+          const sortedRed = sortPlayers(game.teamRed);
+          const blueWins = game.winner === 'teamBlue';
+          const redWins = game.winner === 'teamRed';
+          
+          return (
+            <div class="flex-shrink-0 w-[200px] border rounded-lg overflow-hidden">
+              <!-- Game header -->
+              <div class="bg-muted px-3 py-2 border-b">
+                <div class="text-sm font-semibold text-center">Game {game.gameNumber}</div>
               </div>
-              <div class="space-y-1">
-                {game.teamBlue.map((player) => (
-                  <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full" style={`background-color: ${player.color}`} />
-                    <img src={player.picture} alt={player.name} class="w-6 h-6 rounded-full object-cover" />
-                    <span class="text-sm">{player.name}</span>
-                  </div>
-                ))}
+              
+              <!-- Team Blue -->
+              <div class={`p-3 ${blueWins ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}>
+                <div class="text-xs font-medium mb-2 text-blue-600 dark:text-blue-400 flex items-center justify-between">
+                  <span>Blue</span>
+                  {blueWins && <span class="text-lg">✓</span>}
+                </div>
+                <div class="space-y-1.5">
+                  {sortedBlue.map((player) => (
+                    <div class="flex items-center gap-1.5 text-xs">
+                      <img 
+                        src={player.picture} 
+                        alt={player.name} 
+                        class="w-4 h-4 rounded-full object-cover flex-shrink-0"
+                      />
+                      <span class={blueWins ? 'font-medium' : ''}>{player.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <!-- Divider -->
+              <div class="border-t" />
+              
+              <!-- Team Red -->
+              <div class={`p-3 ${redWins ? 'bg-red-50 dark:bg-red-950/30' : ''}`}>
+                <div class="text-xs font-medium mb-2 text-red-600 dark:text-red-400 flex items-center justify-between">
+                  <span>Red</span>
+                  {redWins && <span class="text-lg">✓</span>}
+                </div>
+                <div class="space-y-1.5">
+                  {sortedRed.map((player) => (
+                    <div class="flex items-center gap-1.5 text-xs">
+                      <img 
+                        src={player.picture} 
+                        alt={player.name} 
+                        class="w-4 h-4 rounded-full object-cover flex-shrink-0"
+                      />
+                      <span class={redWins ? 'font-medium' : ''}>{player.name}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-            <div class={`p-3 rounded ${game.winner === 'teamRed' ? 'bg-red-100 dark:bg-red-950' : 'bg-muted'}`}>
-              <div class="text-sm font-medium mb-2 text-red-600 dark:text-red-400">
-                Team Red {game.winner === 'teamRed' && '👑'}
-              </div>
-              <div class="space-y-1">
-                {game.teamRed.map((player) => (
-                  <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full" style={`background-color: ${player.color}`} />
-                    <img src={player.picture} alt={player.name} class="w-6 h-6 rounded-full object-cover" />
-                    <span class="text-sm">{player.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
+          );
+        })}
+      </div>
     </div>
+    
+    {games.length === 0 && (
+      <div class="text-center py-8 text-muted-foreground">
+        No games played yet
+      </div>
+    )}
   </CardContent>
 </Card>

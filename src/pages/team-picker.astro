@@ -1,0 +1,18 @@
+---
+import TeamPickerDataSectionSkeleton from "@/components/team-picker/skeletons/TeamPickerSectionSkeleton.astro";
+import TeamPickerSection from "@/components/team-picker/TeamPickerSection.astro";
+import Layout from "@/layouts/Layout.astro";
+
+---
+
+<Layout title="Team Picker - Brawl Master Tracker">
+  <div class="space-y-6 max-w-5xl mx-auto">
+    <div>
+      <h1 class="text-4xl font-bold">🎲 Team Picker</h1>
+      <p class="text-muted-foreground">Randomly shuffle participants into balanced teams</p>
+    </div>
+    <TeamPickerSection server:defer>
+      <TeamPickerDataSectionSkeleton slot="fallback" />
+    </TeamPickerSection>
+  </div>
+</Layout>

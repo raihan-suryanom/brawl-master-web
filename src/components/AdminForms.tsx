@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,14 +12,27 @@ interface AdminFormsProps {
 }
 
 export function AdminForms({ players, series }: AdminFormsProps) {
+  // Get latest series by createdAt helper
+  const getLatestSeries = () => {
+    if (series.length === 0) return "";
+    const sorted = [...series].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    return sorted[0]._id;
+  };
+
+  // Tab control
+  const [activeTab, setActiveTab] = useState("series");
+
   // Add Series state
   const [seriesName, setSeriesName] = useState("");
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
   const [seriesLoading, setSeriesLoading] = useState(false);
 
-  // Add Game state
-  const [selectedSeries, setSelectedSeries] = useState(series[0]?._id || "");
+  // Add Game state - Default to latest series
+  const [selectedSeries, setSelectedSeries] = useState(getLatestSeries());
   const [gameNumber, setGameNumber] = useState(1);
+  const [existingGames, setExistingGames] = useState<number[]>([]);
   const [teamBlue, setTeamBlue] = useState<string[]>([]);
   const [teamRed, setTeamRed] = useState<string[]>([]);
   const [winner, setWinner] = useState<"teamBlue" | "teamRed">("teamBlue");
@@ -29,6 +42,80 @@ export function AdminForms({ players, series }: AdminFormsProps) {
 
   // Get participants for selected series
   const seriesParticipants = series.find(s => s._id === selectedSeries)?.participants || [];
+
+  // Load picked teams from sessionStorage on mount
+  useEffect(() => {
+    const storedTeams = sessionStorage.getItem('pickedTeams');
+    if (storedTeams) {
+      try {
+        const { seriesId, teamBlue: blue, teamRed: red } = JSON.parse(storedTeams);
+        setSelectedSeries(seriesId);
+        setTeamBlue(blue);
+        setTeamRed(red);
+        
+        // Clear sessionStorage
+        sessionStorage.removeItem('pickedTeams');
+      } catch (error) {
+        console.error("Error loading picked teams:", error);
+      }
+    }
+  }, []);
+
+  // Listen for team picker confirmation event
+  useEffect(() => {
+    const handleTeamPickerConfirmed = () => {
+      // Switch to Add Game tab
+      setActiveTab("game");
+      
+      // Load teams from sessionStorage
+      const storedTeams = sessionStorage.getItem('pickedTeams');
+      if (storedTeams) {
+        try {
+          const { seriesId, teamBlue: blue, teamRed: red } = JSON.parse(storedTeams);
+          
+          // Use provided series or default to latest
+          const targetSeries = seriesId || getLatestSeries();
+          setSelectedSeries(targetSeries);
+          setTeamBlue(blue);
+          setTeamRed(red);
+          
+          // Clear sessionStorage
+          sessionStorage.removeItem('pickedTeams');
+        } catch (error) {
+          console.error("Error loading picked teams:", error);
+        }
+      }
+    };
+
+    window.addEventListener('teamPickerConfirmed', handleTeamPickerConfirmed);
+    return () => window.removeEventListener('teamPickerConfirmed', handleTeamPickerConfirmed);
+  }, [series]);
+
+  // Fetch existing games when series changes
+  useEffect(() => {
+    const fetchGames = async () => {
+      if (!selectedSeries) return;
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/series/${selectedSeries}/games`);
+        if (!response.ok) throw new Error("Failed to fetch games");
+        
+        const games = await response.json();
+        const gameNumbers = games.map((g: any) => g.gameNumber);
+        setExistingGames(gameNumbers);
+        
+        // Set default game number to latest + 1
+        const maxGameNumber = gameNumbers.length > 0 ? Math.max(...gameNumbers) : 0;
+        setGameNumber(maxGameNumber + 1);
+      } catch (error) {
+        console.error("Error fetching games:", error);
+        setExistingGames([]);
+        setGameNumber(1);
+      }
+    };
+
+    fetchGames();
+  }, [selectedSeries]);
 
   // Handle Add Series
   const handleAddSeries = async (e: React.FormEvent) => {
@@ -49,8 +136,6 @@ export function AdminForms({ players, series }: AdminFormsProps) {
           participants: selectedParticipants,
         }),
       });
-      console.log({response})
-
 
       if (!response.ok) throw new Error("Failed to create series");
 
@@ -83,6 +168,12 @@ export function AdminForms({ players, series }: AdminFormsProps) {
     const uniquePlayers = new Set(allPlayers);
     if (uniquePlayers.size !== allPlayers.length) {
       alert("❌ Players cannot be in both teams!");
+      return;
+    }
+
+    // Check for duplicate game number
+    if (existingGames.includes(gameNumber)) {
+      alert(`❌ Game ${gameNumber} already exists! Please use a different game number.`);
       return;
     }
 
@@ -138,7 +229,7 @@ export function AdminForms({ players, series }: AdminFormsProps) {
   };
 
   return (
-    <Tabs defaultValue="series" className="w-full">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="series">Add Series</TabsTrigger>
         <TabsTrigger value="game">Add Game</TabsTrigger>
@@ -219,11 +310,14 @@ export function AdminForms({ players, series }: AdminFormsProps) {
                     }}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    {series.map((s) => (
-                      <option key={s._id} value={s._id}>
-                        {s.name}
-                      </option>
-                    ))}
+                    {[...series]
+                      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                      .map((s) => (
+                        <option key={s._id} value={s._id}>
+                          {s.name}
+                        </option>
+                      ))
+                    }
                   </select>
                 </div>
 
