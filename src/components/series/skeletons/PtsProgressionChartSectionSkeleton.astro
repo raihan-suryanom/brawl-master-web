@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
   </CardHeader>
   <CardContent>
     <div class="h-[300px] flex items-end gap-2 animate-pulse">
-      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(() => (
         <div class="flex-1 bg-muted rounded-t" style={`height: ${Math.random() * 80 + 20}%`}></div>
       ))}
     </div>

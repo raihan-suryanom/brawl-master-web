@@ -13,7 +13,7 @@ interface CombinationsTableProps {
   size?: 2 | 3;
 }
 
-export function CombinationsTable({ combinations, size }: CombinationsTableProps) {
+export function CombinationsTable({ combinations }: CombinationsTableProps) {
   return (
     <Table>
       <TableHeader>

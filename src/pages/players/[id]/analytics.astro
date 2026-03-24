@@ -1,0 +1,39 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PerformanceTrendsChart } from "@/components/PerformanceTrendsChart";
+import { ClutchStatsCard } from "@/components/ClutchStatsCard";
+import { ComebackAnalysisCard } from "@/components/ComebackAnalysisCard";
+
+const { id } = Astro.params;
+const playerName = Astro.url.searchParams.get("name") || "Player";
+---
+
+<Layout title={`${playerName} Analytics - Brawl Master Tracker`}>
+  <div class="max-w-6xl mx-auto space-y-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-4xl font-bold">{playerName} Analytics</h1>
+        <p class="text-muted-foreground">Performance trends and clutch stats</p>
+      </div>
+      <a
+        href={`/players/${id}`}
+        class="px-4 py-2 border rounded-lg hover:bg-accent transition-colors"
+      >
+        ← Back to Profile
+      </a>
+    </div>
+
+    <!-- Performance Trends Chart -->
+    <PerformanceTrendsChart playerId={id} playerName={playerName} client:load />
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Clutch Stats -->
+      <ClutchStatsCard playerId={id} playerName={playerName} client:load />
+
+      <!-- Comeback Analysis -->
+      <ComebackAnalysisCard playerId={id} playerName={playerName} client:load />
+    </div>
+  </div>
+</Layout>

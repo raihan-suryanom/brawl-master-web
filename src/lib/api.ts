@@ -46,6 +46,17 @@ export const api = {
     }
     return fetcher(`/players/${playerId}/game-progression`);
   },
+  getPlayerPerformanceTrends: (playerId: string) =>
+    fetcher(`/players/${playerId}/performance-trends`),
+  getPlayerClutchStats: (playerId: string) =>
+    fetcher(`/players/${playerId}/clutch-stats`),
+  getPlayerComebackAnalysis: (playerId: string) =>
+    fetcher(`/players/${playerId}/comeback-analysis`),
+  // Series difficulty
+  getSeriesDifficulty: (seriesId: string) =>
+    fetcher(`/series/${seriesId}/stats/difficulty`),
+  getAllSeriesDifficulty: () =>
+    fetcher(`/aggregate-stats/series-difficulty`),
   // Aggregate stats
   getBestCombinations: (size: 2 | 3, seriesId?: string) => {
     if (seriesId) {
@@ -101,6 +112,7 @@ export type PlayerStats = {
   minPossiblePts?: number;
   maxPossiblePts?: number;
   zone?: "none" | "champion" | "safe" | "last";
+  positionChange?: number; // Positive = moved up, Negative = moved down, 0 = no change
   lastFiveGames?: Array<{
     gameNumber: number;
     result: "W" | "L";
@@ -137,14 +149,101 @@ export type PtsProgression = {
 
 export type GameProgression = {
   gameIndex: number;
-  points: number;
   gameNumber: number;
   seriesName: string;
   seriesId: string;
   result: "W" | "L";
   ptsGained: number;
   cumulativePts: number;
-  totalWins: number;
-  highestWinStreak: number;
-  highestLoseStreak: number;
+};
+
+export type PlayerRating = {
+  tier: 'S+' | 'S' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+  label: string;
+  color: string;
+};
+
+export type SeriesPerformance = {
+  seriesId: string;
+  seriesName: string;
+  seriesDate: string;
+  pts: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  winStreak: number;
+  loseStreak: number;
+};
+
+export type PerformanceTrends = {
+  seriesPerformance: SeriesPerformance[];
+  rating: PlayerRating;
+  avgPts: number;
+  peakPts: number;
+  peakSeries: string | null;
+  winRate: number;
+  consistency: number;
+  form: {
+    trend: 'improving' | 'declining' | 'stable' | 'neutral';
+    change: number;
+  };
+  totalSeries: number;
+};
+
+export type ClutchStats = {
+  closeGameWinRate: number;
+  closeGamesPlayed: number;
+  closeGamesWon: number;
+  clutchRating: string;
+};
+
+export type DifficultyFactor = {
+  value: number;
+  score: number;
+  description: string;
+};
+
+export type SeriesDifficulty = {
+  difficultyScore: number;
+  difficultyTier: 'Insane' | 'Brutal' | 'Tough' | 'Average' | 'Easy' | 'Unknown' | 'No Data';
+  difficultyEmoji: string;
+  difficultyColor: string;
+  seriesName?: string;
+  seriesId?: string;
+  factors: {
+    competitiveness: DifficultyFactor;
+    closeFinishes: DifficultyFactor;
+    ptsVariance: DifficultyFactor;
+    positionChanges: DifficultyFactor;
+  };
+};
+
+export type PositionPoint = {
+  gameNumber: number;
+  position: number;
+  change: number;
+};
+
+export type SeriesComebackBreakdown = {
+  seriesId: string;
+  seriesName: string;
+  hadComeback: boolean;
+  comebackStrength: number;
+  hadThrow: boolean;
+  throwSeverity: number;
+  momentumShifts: number;
+  progression: PositionPoint[];
+};
+
+export type ComebackAnalysis = {
+  totalSeries: number;
+  comebacks: number;
+  throws: number;
+  comebackRate: number;
+  throwRate: number;
+  avgComebackStrength: number;
+  avgThrowSeverity: number;
+  mentalToughness: 'Elite' | 'Strong' | 'Solid' | 'Shaky' | 'Fragile' | 'N/A';
+  momentumShifts: number;
+  seriesBreakdown: SeriesComebackBreakdown[];
 };

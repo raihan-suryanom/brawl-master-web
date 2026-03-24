@@ -17,13 +17,11 @@ export function PlayerProgressionLineChart({ progression }: PlayerProgressionLin
   // Transform data for recharts
   const chartData = progression.map((item) => ({
     gameIndex: item.gameIndex,
-    points: item.points,
+    points: item.cumulativePts,
     result: item.result,
     seriesName: item.seriesName,
     gameNumber: item.gameNumber,
-    totalWins: item.totalWins,
-    highestWinStreak: item.highestWinStreak,
-    highestLoseStreak: item.highestLoseStreak,
+    ptsGained: item.ptsGained,
   }));
 
   const CustomTooltip = ({ active, payload }: any) => {

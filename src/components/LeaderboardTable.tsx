@@ -113,7 +113,19 @@ export function LeaderboardTable({
                   className={`${zoneStyle.color} ${zoneStyle.color ? 'border-l-4' : ''}`}
                 >
                   <TableCell className="font-bold text-lg">
-                    {rank}
+                    <div className="flex items-center gap-2">
+                      <span>{rank}</span>
+                      {stat.positionChange !== undefined && stat.positionChange !== 0 && (
+                        <span className={`flex items-center gap-1 ${stat.positionChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                          <span className="text-xl leading-none">
+                            {stat.positionChange > 0 ? '↑' : '↓'}
+                          </span>
+                          <span className="text-sm font-medium">
+                            {Math.abs(stat.positionChange)}
+                          </span>
+                        </span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">

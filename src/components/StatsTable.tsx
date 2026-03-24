@@ -40,6 +40,7 @@ export function StatsTable({ stats }: StatsTableProps) {
             <TableHead className="text-center">WS</TableHead>
             <TableHead className="text-center">LS</TableHead>
             <TableHead className="text-center">Pts</TableHead>
+            <TableHead className="text-center">WR%</TableHead>
             <TableHead className="text-center">Last 5</TableHead>
           </TableRow>
         </TableHeader>
@@ -85,6 +86,9 @@ export function StatsTable({ stats }: StatsTableProps) {
                 <TableCell className="text-center">{stat.highestLoseStreak}</TableCell>
                 <TableCell className="text-center font-bold text-lg">
                   {stat.pts}
+                </TableCell>
+                <TableCell className="text-center font-medium">
+                  {Math.round(stat.winRate)}%
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-1 justify-center">

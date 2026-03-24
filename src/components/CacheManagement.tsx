@@ -1,5 +1,3 @@
-import { Button } from "@/components/ui/button";
-
 export function CacheManagement() {
   const API_BASE_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:7239/api";
 
