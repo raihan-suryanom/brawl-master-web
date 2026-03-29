@@ -24,11 +24,62 @@ export function TeamPicker({ series }: TeamPickerProps) {
   const [teamRed, setTeamRed] = useState<Player[]>([]);
   const [hasResult, setHasResult] = useState(false);
   const [shufflingPlayers, setShufflingPlayers] = useState<Player[]>([]);
+  const [separationMode, setSeparationMode] = useState<'none' | 'survival' | 'final-battle'>('none');
 
   const API_BASE_URL = import.meta.env.PUBLIC_API_URL || "http://localhost:7239/api";
 
   // Get participants for selected series
   const participants = series.find(s => s._id === selectedSeries)?.participants || [];
+
+  // Check team separation modes
+  const checkTeamSeparationMode = async (): Promise<{ 
+    mode: 'none' | 'survival' | 'final-battle';
+    rank5?: Player; 
+    rank6?: Player;
+  }> => {
+    try {
+      // Fetch games to check count
+      const gamesResponse = await fetch(`${API_BASE_URL}/series/${selectedSeries}/games`);
+      if (!gamesResponse.ok) return { mode: 'none' };
+      
+      const games = await gamesResponse.json();
+      const gamesPlayed = games.length;
+      
+      // Fetch current standings
+      const statsResponse = await fetch(`${API_BASE_URL}/series/${selectedSeries}/stats`);
+      if (!statsResponse.ok) return { mode: 'none' };
+      
+      const stats = await statsResponse.json();
+      
+      if (stats.length < 6) return { mode: 'none' };
+      
+      // Get rank 5 and 6 players (last two positions)
+      const rank5PlayerId = stats[4].playerId;
+      const rank6PlayerId = stats[5].playerId;
+      
+      const rank5 = participants.find(p => p._id === rank5PlayerId);
+      const rank6 = participants.find(p => p._id === rank6PlayerId);
+      
+      // Check FINAL BATTLE MODE: Top 4 guaranteed safe (only 2 left fighting)
+      const top4Safe = stats.slice(0, 4).every((s: any) => 
+        s.zone === "safe" || s.zone === "champion"
+      );
+      
+      if (top4Safe) {
+        return { mode: 'final-battle', rank5, rank6 };
+      }
+      
+      // Check SURVIVAL MODE: After game 4, always separate bottom 2
+      if (gamesPlayed >= 4) {
+        return { mode: 'survival', rank5, rank6 };
+      }
+      
+      return { mode: 'none' };
+    } catch (error) {
+      console.error("Error checking team separation mode:", error);
+      return { mode: 'none' };
+    }
+  };
 
   // Shuffle array helper
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -56,9 +107,68 @@ export function TeamPicker({ series }: TeamPickerProps) {
     return (sameBlue && sameRed) || (reversedBlue && reversedRed);
   };
 
+  // Get all duo combinations from a team
+  const getDuoCombinations = (team: string[]): Set<string> => {
+    const duos = new Set<string>();
+    for (let i = 0; i < team.length; i++) {
+      for (let j = i + 1; j < team.length; j++) {
+        // Sort IDs to ensure consistent duo representation
+        const duo = [team[i], team[j]].sort().join('-');
+        duos.add(duo);
+      }
+    }
+    return duos;
+  };
+
+  // Check if any duo appears in both last 2 games
+  const hasForbiddenDuo = (blue: string[], red: string[], lastGames: any[]): boolean => {
+    if (lastGames.length < 2) return false;
+
+    // Get duos from current teams
+    const currentBlueDuos = getDuoCombinations(blue);
+    const currentRedDuos = getDuoCombinations(red);
+    const allCurrentDuos = new Set([...currentBlueDuos, ...currentRedDuos]);
+
+    // Get duos from last 2 games
+    const game1Blue = lastGames[0].teamBlue.map((p: any) => p._id);
+    const game1Red = lastGames[0].teamRed.map((p: any) => p._id);
+    const game1Duos = new Set([
+      ...getDuoCombinations(game1Blue),
+      ...getDuoCombinations(game1Red)
+    ]);
+
+    const game2Blue = lastGames[1].teamBlue.map((p: any) => p._id);
+    const game2Red = lastGames[1].teamRed.map((p: any) => p._id);
+    const game2Duos = new Set([
+      ...getDuoCombinations(game2Blue),
+      ...getDuoCombinations(game2Red)
+    ]);
+
+    // Find duos that appeared in BOTH last 2 games
+    const repeatedDuos = new Set<string>();
+    game1Duos.forEach(duo => {
+      if (game2Duos.has(duo)) {
+        repeatedDuos.add(duo);
+      }
+    });
+
+    // Check if current teams have any repeated duo (would be 3rd time)
+    for (const duo of allCurrentDuos) {
+      if (repeatedDuos.has(duo)) {
+        return true; // This duo would appear 3x in a row - FORBIDDEN!
+      }
+    }
+
+    return false;
+  };
+
   // Fetch last N games and validate combination
   const getValidCombination = async (): Promise<{ blue: Player[], red: Player[] } | null> => {
     try {
+      // Check team separation mode
+      const separationCheck = await checkTeamSeparationMode();
+      setSeparationMode(separationCheck.mode);
+      
       // Fetch last 2 games
       const response = await fetch(`${API_BASE_URL}/series/${selectedSeries}/games`);
       if (!response.ok) throw new Error("Failed to fetch games");
@@ -66,20 +176,54 @@ export function TeamPicker({ series }: TeamPickerProps) {
       const games = await response.json();
       const lastGames = games.slice(-2); // Get last 2 games
 
-      // Try to find valid combination (max 50 attempts)
-      for (let attempt = 0; attempt < 50; attempt++) {
-        const shuffled = shuffleArray(participants);
-        const mid = Math.floor(shuffled.length / 2);
-        const blue = shuffled.slice(0, mid);
-        const red = shuffled.slice(mid);
+      // Try to find valid combination (max 100 attempts for duo check)
+      for (let attempt = 0; attempt < 100; attempt++) {
+        let blue: Player[];
+        let red: Player[];
+        
+        const shouldSeparate = separationCheck.mode !== 'none';
+        
+        if (shouldSeparate && separationCheck.rank5 && separationCheck.rank6) {
+          // SEPARATION MODE: Rank 5 & 6 MUST be on different teams!
+          const rank5 = separationCheck.rank5;
+          const rank6 = separationCheck.rank6;
+          
+          // Get remaining players (rank 1-4)
+          const others = participants.filter(p => 
+            p._id !== rank5._id && p._id !== rank6._id
+          );
+          
+          // Shuffle others
+          const shuffledOthers = shuffleArray(others);
+          
+          // Randomly decide which team gets rank5 vs rank6
+          const rank5InBlue = Math.random() < 0.5;
+          
+          if (rank5InBlue) {
+            // Rank 5 in Blue, Rank 6 in Red
+            blue = [rank5, ...shuffledOthers.slice(0, 2)];
+            red = [rank6, ...shuffledOthers.slice(2, 4)];
+          } else {
+            // Rank 6 in Blue, Rank 5 in Red
+            blue = [rank6, ...shuffledOthers.slice(0, 2)];
+            red = [rank5, ...shuffledOthers.slice(2, 4)];
+          }
+        } else {
+          // Normal random shuffle
+          const shuffled = shuffleArray(participants);
+          const mid = Math.floor(shuffled.length / 2);
+          blue = shuffled.slice(0, mid);
+          red = shuffled.slice(mid);
+        }
 
-        // Check against last 2 games
+        const currentBlue = blue.map(p => p._id);
+        const currentRed = red.map(p => p._id);
+
+        // Check 1: No same full combination
         let isDuplicate = false;
         for (const game of lastGames) {
           const prevBlue = game.teamBlue.map((p: any) => p._id);
           const prevRed = game.teamRed.map((p: any) => p._id);
-          const currentBlue = blue.map(p => p._id);
-          const currentRed = red.map(p => p._id);
 
           if (isSameCombination(currentBlue, currentRed, prevBlue, prevRed)) {
             isDuplicate = true;
@@ -87,9 +231,17 @@ export function TeamPicker({ series }: TeamPickerProps) {
           }
         }
 
-        if (!isDuplicate) {
-          return { blue, red };
+        if (isDuplicate) continue;
+
+        // Check 2: No duo appearing 3x in a row
+        if (lastGames.length >= 2) {
+          if (hasForbiddenDuo(currentBlue, currentRed, lastGames)) {
+            continue; // This has a duo that would appear 3x - try again
+          }
         }
+
+        // Passed all checks!
+        return { blue, red };
       }
 
       // If all attempts failed, return any combination (edge case)
@@ -266,6 +418,35 @@ export function TeamPicker({ series }: TeamPickerProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
+              {/* Separation Mode Indicators */}
+              {separationMode === 'final-battle' && (
+                <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 rounded-lg border-2 border-orange-600 shadow-lg">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">⚔️</span>
+                    <div>
+                      <h4 className="font-bold text-lg">FINAL BATTLE MODE!</h4>
+                      <p className="text-sm opacity-90">
+                        Top 4 players are safe. Only 2 left fighting for survival!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {separationMode === 'survival' && (
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-lg border-2 border-purple-600 shadow-lg">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">🔥</span>
+                    <div>
+                      <h4 className="font-bold text-lg">SURVIVAL MODE ACTIVE!</h4>
+                      <p className="text-sm opacity-90">
+                        Bottom 2 positions have been separated to fight for their spot!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Team Blue */}
                 <div className="space-y-2">

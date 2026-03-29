@@ -14,15 +14,26 @@ export function PlayerProgressionLineChart({ progression }: PlayerProgressionLin
     );
   }
 
+  // Debug logging
+  console.log("Progression data:", progression);
+
   // Transform data for recharts
-  const chartData = progression.map((item) => ({
-    gameIndex: item.gameIndex,
-    points: item.cumulativePts,
-    result: item.result,
-    seriesName: item.seriesName,
-    gameNumber: item.gameNumber,
-    ptsGained: item.ptsGained,
-  }));
+  const chartData = progression.map((item) => {
+    const dataPoint = {
+      gameIndex: item.gameIndex,
+      points: item.points,  // Backend sends 'points', not 'cumulativePts'
+      result: item.result,
+      seriesName: item.seriesName,
+      gameNumber: item.gameNumber,
+      totalWins: item.totalWins,
+      highestWinStreak: item.highestWinStreak,
+      highestLoseStreak: item.highestLoseStreak,
+    };
+    console.log("Chart data point:", dataPoint);
+    return dataPoint;
+  });
+
+  console.log("Final chartData:", chartData);
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -38,7 +49,7 @@ export function PlayerProgressionLineChart({ progression }: PlayerProgressionLin
           <div className="mt-2 text-xs space-y-1">
             <p>W: {data.totalWins} | WS: {data.highestWinStreak} | LS: {data.highestLoseStreak}</p>
             <p className="font-medium text-primary">
-              Points: {data.points} = {data.totalWins} + {data.highestWinStreak} - {data.highestLoseStreak}
+              Points: {data.points}
             </p>
           </div>
         </div>

@@ -153,8 +153,10 @@ export type GameProgression = {
   seriesName: string;
   seriesId: string;
   result: "W" | "L";
-  ptsGained: number;
-  cumulativePts: number;
+  totalWins: number;
+  highestWinStreak: number;
+  highestLoseStreak: number;
+  points: number;
 };
 
 export type PlayerRating = {
